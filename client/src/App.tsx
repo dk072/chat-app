@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { SocketProvider } from './context/SocketContext';
@@ -9,17 +10,15 @@ import RegisterCard from './components/auth/RegisterCard';
 import Sidebar from './components/chat/Sidebar';
 import ChatWindow from './components/chat/ChatWindow';
 import SettingsModal from './components/chat/SettingsModal';
-import Dashboard from './components/admin/Dashboard';
 import CallOverlay from './components/call/CallOverlay';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 const MainLayout: React.FC = () => {
   const { user, loading } = useAuth();
   const { activeChat } = useChat();
   const [showSettings, setShowSettings] = useState(false);
-  const [showAdmin, setShowAdmin] = useState(false);
   const [isLoginView, setIsLoginView] = useState(true);
 
-  // 1. Loading Splash Screen
   if (loading) {
     return (
       <div className="h-[100dvh] w-full flex flex-col items-center justify-center bg-chat-bg-dark text-white select-none">
@@ -32,11 +31,9 @@ const MainLayout: React.FC = () => {
     );
   }
 
-  // 2. Unauthenticated Login/Signup Screen
   if (!user) {
     return (
       <div className="h-[100dvh] w-full flex items-center justify-center bg-slate-900 overflow-hidden relative">
-        {/* Animated background color blobs */}
         <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-brand-600/10 blur-[120px] animate-pulse" />
         <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-indigo-600/10 blur-[120px] animate-pulse" />
 
@@ -51,33 +48,43 @@ const MainLayout: React.FC = () => {
     );
   }
 
-  // 3. Authenticated Interface
   return (
     <div className="h-[100dvh] w-full flex overflow-hidden bg-chat-bg-light dark:bg-chat-bg-dark">
-      {/* Sidebar List */}
       <div className={`h-full shrink-0 w-full md:w-80 ${activeChat ? 'hidden md:block' : 'block'}`}>
         <Sidebar onOpenSettings={() => setShowSettings(true)} />
       </div>
 
-      {/* Main Content Area (Chat Window or Admin Dashboard) */}
       <div className={`flex-1 h-full flex-col min-w-0 relative ${activeChat ? 'flex' : 'hidden md:flex'}`}>
         <ChatWindow />
-
-        {/* Admin Dashboard Overlay */}
-        <Dashboard isOpen={showAdmin} onClose={() => setShowAdmin(false)} />
       </div>
 
-      {/* Settings Modal Dialog */}
       <SettingsModal
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
-        onOpenAdmin={() => setShowAdmin(true)}
+        onOpenAdmin={() => window.location.href = '/admin'}
       />
 
-      {/* Global Call Overlay */}
       <CallOverlay />
     </div>
   );
+};
+
+const AdminRoute: React.FC = () => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">Loading...</div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/" />;
+  }
+
+  if (user.role !== 'ADMIN') {
+    return <Navigate to="/" />;
+  }
+
+  return <AdminDashboard />;
 };
 
 const App: React.FC = () => {
@@ -87,7 +94,12 @@ const App: React.FC = () => {
         <SocketProvider>
           <CallProvider>
             <ChatProvider>
-              <MainLayout />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<MainLayout />} />
+                  <Route path="/admin" element={<AdminRoute />} />
+                </Routes>
+              </BrowserRouter>
             </ChatProvider>
           </CallProvider>
         </SocketProvider>
