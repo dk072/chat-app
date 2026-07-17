@@ -90,13 +90,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onOpenSettings }) => {
   };
 
   return (
-    <div className="w-full h-full border-r border-chat-border-light dark:border-chat-border-dark bg-chat-panel-light dark:bg-chat-panel-darker flex flex-col shrink-0">
+    <div className="w-full h-full flex flex-col shrink-0 bg-white/40 dark:bg-slate-900/40">
       {/* Header */}
-      <div className="px-5 py-4 flex items-center justify-between border-b border-chat-border-light dark:border-chat-border-dark bg-slate-50/50 dark:bg-slate-950/20">
+      <div className="px-5 py-4 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-700/50 bg-white/30 dark:bg-slate-950/30 backdrop-blur-md">
         <div className="flex items-center space-x-3">
           <Avatar src={user?.profilePicture} name={user?.username || ''} size="sm" />
           <div className="leading-tight">
-            <h1 className="font-bold text-sm truncate max-w-[120px]">{user?.username}</h1>
+            <h1 className="font-bold font-outfit text-base truncate max-w-[120px]">{user?.username}</h1>
             <span className="text-[10px] text-slate-400 capitalize">{user?.role}</span>
           </div>
         </div>
@@ -109,18 +109,18 @@ const Sidebar: React.FC<SidebarProps> = ({ onOpenSettings }) => {
       </div>
 
       {/* Search Input Area */}
-      <div className="p-4 space-y-2 border-b border-chat-border-light dark:border-chat-border-dark">
+      <div className="p-4 space-y-2 border-b border-slate-200/50 dark:border-slate-700/50">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
             <Search className="w-4 h-4" />
           </div>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={globalSearch ? "Find new users..." : "Search chat rooms..."}
-            className="block w-full pl-9 pr-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent focus:border-brand-500/50 focus:outline-none text-sm transition-all"
-          />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={globalSearch ? "Find new users..." : "Search chat rooms..."}
+              className="block w-full pl-9 pr-4 py-2.5 rounded-xl bg-white/60 dark:bg-slate-950/60 border border-slate-200/50 dark:border-slate-700/50 focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none text-sm transition-all shadow-sm"
+            />
         </div>
 
         {/* Global Search Switch */}
@@ -196,10 +196,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onOpenSettings }) => {
                 <div
                   key={c.id}
                   onClick={() => selectChat(c)}
-                  className={`flex items-center space-x-3 p-3 rounded-2xl cursor-pointer transition-all duration-150 ${
+                  className={`flex items-center space-x-3 p-3 rounded-2xl cursor-pointer transition-all duration-300 ${
                     isSelected
-                      ? 'bg-brand-500/10 dark:bg-brand-600/15 shadow-sm'
-                      : 'hover:bg-slate-100 dark:hover:bg-slate-900/60'
+                      ? 'bg-gradient-to-r from-brand-500/20 to-brand-500/5 dark:from-brand-500/30 dark:to-brand-500/5 shadow-[inset_3px_0_0_0_#8b5cf6] border border-brand-500/20'
+                      : 'hover:bg-white/60 dark:hover:bg-slate-800/50 hover:shadow-sm border border-transparent'
                   }`}
                 >
                   {/* Avatar wrapper */}
@@ -213,7 +213,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onOpenSettings }) => {
                   {/* Message brief details */}
                   <div className="flex-1 min-w-0 space-y-0.5">
                     <div className="flex justify-between items-baseline">
-                      <h4 className={`text-sm font-semibold truncate ${isSelected ? 'text-brand-500 dark:text-brand-400' : ''}`}>
+                      <h4 className={`text-sm font-semibold font-outfit truncate ${isSelected ? 'text-brand-600 dark:text-brand-400' : ''}`}>
                         {c.partner.username}
                       </h4>
                       {lastMsg && (

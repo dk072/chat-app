@@ -409,7 +409,7 @@ const ChatWindow: React.FC = () => {
       )}
 
       {/* Header */}
-      <div className="px-4 md:px-6 py-3 border-b border-chat-border-light dark:border-chat-border-dark bg-chat-panel-light dark:bg-chat-panel-dark flex items-center justify-between z-20">
+      <div className="px-4 md:px-6 py-3 border-b border-slate-200/50 dark:border-slate-700/50 bg-white/30 dark:bg-slate-950/30 backdrop-blur-md flex items-center justify-between z-20">
         <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
           <button 
             onClick={() => selectChat(null)}
@@ -424,7 +424,7 @@ const ChatWindow: React.FC = () => {
             size="sm"
           />
           <div className="leading-tight min-w-0">
-            <h3 className="font-bold text-sm truncate">{activeChat.partner.username}</h3>
+            <h3 className="font-bold text-sm font-outfit truncate">{activeChat.partner.username}</h3>
             <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
               {partnerTyping[activeChat.id] ? (
                 <span className="text-emerald-500 font-semibold animate-pulse">typing...</span>
@@ -513,7 +513,7 @@ const ChatWindow: React.FC = () => {
       <div
         ref={chatViewportRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-6 chat-pattern space-y-4"
+        className="flex-1 overflow-y-auto p-6 glass-texture space-y-4"
       >
         {loadingMessages && messages.length === 0 ? (
           <MessagesSkeleton />
@@ -654,10 +654,10 @@ const ChatWindow: React.FC = () => {
 
                     {/* Actual Bubble card */}
                     <div
-                      className={`p-3.5 rounded-2xl relative select-text shadow-sm ${
+                      className={`p-3.5 rounded-2xl relative select-text shadow-sm transition-all hover:shadow-md ${
                         isSelf
-                          ? 'bg-brand-500 dark:bg-brand-600 text-white rounded-br-none bubble-tail-self'
-                          : 'bg-white dark:bg-chat-panel-dark text-slate-800 dark:text-slate-100 rounded-bl-none bubble-tail-other'
+                          ? 'bg-gradient-to-br from-brand-500 to-indigo-600 text-white rounded-br-none bubble-tail-self shadow-brand-500/30'
+                          : 'bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-slate-100 rounded-bl-none bubble-tail-other border border-white/20 dark:border-white/5'
                       }`}
                     >
                       {/* Reply preview Quote inside bubble */}
@@ -897,7 +897,7 @@ const ChatWindow: React.FC = () => {
       )}
 
       {/* Input controls section */}
-      <div className="p-4 bg-chat-panel-light dark:bg-chat-panel-dark border-t border-chat-border-light dark:border-chat-border-dark flex items-center space-x-3 z-20">
+      <div className="p-4 bg-white/30 dark:bg-slate-950/30 backdrop-blur-md border-t border-slate-200/50 dark:border-slate-700/50 flex items-center space-x-3 z-20">
         {/* Attachment menu trigger */}
         <button
           onClick={() => fileInputRef.current?.click()}
@@ -983,15 +983,14 @@ const ChatWindow: React.FC = () => {
               }}
               placeholder="Write a message..."
               rows={1}
-              className="block w-full py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-transparent focus:border-brand-500/30 focus:outline-none text-xs transition-all resize-none max-h-32 focus:bg-white dark:focus:bg-black"
+              className="block w-full py-3 px-4 rounded-2xl bg-white/60 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-700/50 focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none text-xs transition-all resize-none max-h-32 shadow-inner"
             />
 
             {/* If input has text or file, show Send. Otherwise show Microphone for voice notes */}
             {inputText.trim() || selectedFile ? (
               <button
                 onClick={handleSend}
-                className="p-3 rounded-2xl text-white shadow-md bg-brand-500 hover:bg-brand-600 hover:shadow-brand-500/10 transition-all shrink-0 active:scale-95"
-                style={{ backgroundColor: 'rgb(var(--accent-color))' }}
+                className="p-3 rounded-2xl text-white shadow-neon-brand bg-gradient-to-br from-brand-500 to-indigo-600 hover:opacity-90 transition-all shrink-0 active:scale-95 border border-brand-400/30"
               >
                 <Send className="w-4 h-4 fill-white text-white" />
               </button>

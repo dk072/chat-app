@@ -49,8 +49,8 @@ const MainLayout: React.FC = () => {
   }
 
   return (
-    <div className="h-[100dvh] w-full flex overflow-hidden bg-chat-bg-light dark:bg-chat-bg-dark">
-      <div className={`h-full shrink-0 w-full md:w-80 ${activeChat ? 'hidden md:block' : 'block'}`}>
+    <div className="h-[100dvh] w-full flex overflow-hidden mesh-bg-light dark:mesh-bg-dark relative">
+      <div className={`h-full shrink-0 w-full md:w-80 glass-panel border-r border-slate-200/20 dark:border-white/5 ${activeChat ? 'hidden md:block' : 'block'}`}>
         <Sidebar onOpenSettings={() => setShowSettings(true)} />
       </div>
 
