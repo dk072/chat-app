@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "https://chime-backend-n031.onrender.com/api/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
