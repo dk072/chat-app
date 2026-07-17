@@ -25,6 +25,18 @@ services:
       - key: UPLOAD_DIR
         value: ./uploads
 
+  # Chime Admin Panel (Static Site)
+  - type: web
+    name: chime-admin
+    env: static
+    plan: free
+    rootDir: admin
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://chime-backend.onrender.com/api # IMPORTANT: Replace with actual backend URL
+
 # PostgreSQL Database Service configuration
 databases:
   - name: chime-db
