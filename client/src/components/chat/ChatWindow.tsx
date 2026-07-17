@@ -799,19 +799,28 @@ const ChatWindow: React.FC = () => {
                     </div>
 
                     {/* Reactions Float elements list */}
-                    {m.reactions && Object.keys(m.reactions).length > 0 && (
-                      <div className="absolute -bottom-2 right-3 flex space-x-1 z-15 select-none">
-                        {Object.entries(m.reactions).map(([reactUserId, emoji]) => (
-                          <span
-                            key={reactUserId}
-                            title={`Reaction from ${reactUserId === user?.id ? 'You' : 'Friend'}`}
-                            className="text-xs px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm transition-transform active:scale-90"
-                          >
-                            {emoji}
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                    {(() => {
+                      let parsedReactions: Record<string, string> = {};
+                      try {
+                        parsedReactions = typeof m.reactions === 'string' ? JSON.parse(m.reactions) : m.reactions || {};
+                      } catch (e) {}
+
+                      if (!parsedReactions || Object.keys(parsedReactions).length === 0) return null;
+
+                      return (
+                        <div className="absolute -bottom-2 right-3 flex space-x-1 z-15 select-none">
+                          {Object.entries(parsedReactions).map(([reactUserId, emoji]) => (
+                            <span
+                              key={reactUserId}
+                              title={`Reaction from ${reactUserId === user?.id ? 'You' : 'Friend'}`}
+                              className="text-xs px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm transition-transform active:scale-90"
+                            >
+                              {emoji}
+                            </span>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               );
