@@ -21,7 +21,7 @@ services:
       - key: JWT_EXPIRY
         value: 7d
       - key: CLIENT_URL
-        value: https://chat-app-ivory-nu-89.vercel.app
+        value: https://chat-app25.vercel.app
       - key: UPLOAD_DIR
         value: ./uploads
 
