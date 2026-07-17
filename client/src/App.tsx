@@ -8,6 +8,7 @@ import { CallProvider } from './context/CallContext';
 import LoginCard from './components/auth/LoginCard';
 import RegisterCard from './components/auth/RegisterCard';
 import Sidebar from './components/chat/Sidebar';
+import NavigationSidebar from './components/chat/NavigationSidebar';
 import ChatWindow from './components/chat/ChatWindow';
 import SettingsModal from './components/chat/SettingsModal';
 import CallOverlay from './components/call/CallOverlay';
@@ -20,6 +21,7 @@ const MainLayout: React.FC = () => {
   const { activeChat } = useChat();
   const [showSettings, setShowSettings] = useState(false);
   const [isLoginView, setIsLoginView] = useState(true);
+  const [activeNavView, setActiveNavView] = useState<'chats' | 'calls' | 'admin'>('chats');
   const [loadingText, setLoadingText] = useState('Connecting to secure server...');
 
   React.useEffect(() => {
@@ -74,10 +76,28 @@ const MainLayout: React.FC = () => {
   return (
     <div className="h-[100dvh] w-full flex overflow-hidden relative text-slate-800 dark:text-slate-100 selection:bg-brand-500/30">
       <AnimatedBackground />
-      <div className={`h-full shrink-0 w-full md:w-80 glass-panel border-r border-slate-200/20 dark:border-white/5 ${activeChat ? 'hidden md:block' : 'block'}`}>
-        <Sidebar onOpenSettings={() => setShowSettings(true)} />
+
+      {/* Column 1: Navigation Sidebar (Hidden on mobile if chat is active) */}
+      <div className={`h-full shrink-0 ${activeChat ? 'hidden md:block' : 'block'}`}>
+        <NavigationSidebar 
+          onOpenSettings={() => setShowSettings(true)} 
+          activeView={activeNavView}
+          setActiveView={setActiveNavView}
+        />
       </div>
 
+      {/* Column 2: Chat List (Hidden on mobile if chat is active) */}
+      <div className={`h-full shrink-0 w-full md:w-80 glass-panel border-r border-slate-200/20 dark:border-white/5 ${activeChat ? 'hidden md:block' : 'block'}`}>
+        {activeNavView === 'chats' ? (
+          <Sidebar />
+        ) : (
+          <div className="flex-1 h-full flex items-center justify-center text-slate-400">
+            Coming soon...
+          </div>
+        )}
+      </div>
+
+      {/* Column 3: Main Chat Window */}
       <div className={`flex-1 h-full flex-col min-w-0 relative ${activeChat ? 'flex' : 'hidden md:flex'}`}>
         <ChatWindow />
       </div>

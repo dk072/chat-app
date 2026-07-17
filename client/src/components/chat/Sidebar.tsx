@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useChat } from '../../context/ChatContext';
-import { Search, Settings, Pin, MessageSquare, Check, CheckCheck, Loader2 } from 'lucide-react';
+import { Search, Pin, MessageSquare, Check, CheckCheck, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import AnimatedAvatar from '../ui/AnimatedAvatar';
 import { SidebarSkeleton } from '../ui/Skeleton';
 import api from '../../services/api';
 import { Conversation, User } from '../../types';
+import AnimatedAvatar from '../ui/AnimatedAvatar';
 
 interface SidebarProps {
-  onOpenSettings: () => void;
+  // Add props if needed in the future
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ onOpenSettings }) => {
+const Sidebar: React.FC<SidebarProps> = () => {
   const { user } = useAuth();
   const {
     conversations,
@@ -93,20 +93,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onOpenSettings }) => {
   return (
     <div className="w-full h-full flex flex-col shrink-0 bg-white/40 dark:bg-slate-900/40">
       {/* Header */}
-      <div className="px-5 py-4 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-700/50 bg-white/30 dark:bg-slate-950/30 backdrop-blur-md">
-        <div className="flex items-center space-x-3">
-          <AnimatedAvatar src={user?.profilePicture} name={user?.username || ''} size="sm" isOnline={true} />
-          <div className="leading-tight">
-            <h1 className="font-bold font-outfit text-base truncate max-w-[120px]">{user?.username}</h1>
-            <span className="text-[10px] text-brand-500 font-semibold capitalize">{user?.role}</span>
-          </div>
-        </div>
-        <button
-          onClick={onOpenSettings}
-          className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors text-slate-500 dark:text-slate-400"
-        >
-          <Settings className="w-5 h-5" />
-        </button>
+      <div className="px-5 py-5 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-700/50 bg-white/30 dark:bg-slate-950/30 backdrop-blur-md">
+        <h2 className="text-xl font-bold font-outfit text-slate-800 dark:text-white tracking-wide">Messages</h2>
       </div>
 
       {/* Search Input Area */}
