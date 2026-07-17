@@ -7,7 +7,8 @@ import {
   ChevronDown, Download, AlertTriangle, Search, Info, Pin, Play, Pause, Square, ArrowLeft,
   Check, CheckCheck, MessageSquare, Phone, Video
 } from 'lucide-react';
-import Avatar from '../ui/Avatar';
+import AnimatedAvatar from '../ui/AnimatedAvatar';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MessagesSkeleton } from '../ui/Skeleton';
 import api from '../../services/api';
 import { Message, MessageType } from '../../types';
@@ -417,7 +418,7 @@ const ChatWindow: React.FC = () => {
           >
             <ArrowLeft className="w-5 h-5 text-slate-500 dark:text-slate-400" />
           </button>
-          <Avatar
+          <AnimatedAvatar
             src={activeChat.partner.profilePicture}
             name={activeChat.partner.username}
             isOnline={activeChat.partner.isOnline}
@@ -543,14 +544,17 @@ const ChatWindow: React.FC = () => {
               }
 
               return (
-                <div
+                <motion.div
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  layout
                   key={m.id}
                   id={`msg-${m.id}`}
                   className={`flex items-end space-x-2 group ${isSelf ? 'justify-end' : 'justify-start'}`}
                 >
                   {/* Avatar for partner */}
                   {!isSelf && (
-                    <Avatar
+                    <AnimatedAvatar
                       src={m.sender.profilePicture}
                       name={m.sender.username}
                       size="xs"
@@ -822,25 +826,25 @@ const ChatWindow: React.FC = () => {
                       );
                     })()}
                   </div>
-                </div>
+                </motion.div>
               );
             })}
             
             {partnerTyping[activeChat.id] && (
-              <div className="flex w-full justify-start animate-fade-in mt-4">
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex w-full justify-start mt-4">
                 <div className="flex items-end max-w-[85%] md:max-w-[70%] space-x-2 md:space-x-3">
-                  <Avatar
+                  <AnimatedAvatar
                     src={activeChat.partner.profilePicture}
                     name={activeChat.partner.username}
                     size="sm"
                   />
-                  <div className="px-4 py-3 rounded-2xl rounded-bl-sm bg-chat-bubble-otherLight dark:bg-chat-bubble-otherDark border border-chat-border-light dark:border-chat-border-dark shadow-sm flex items-center space-x-1.5 h-[42px]">
+                  <div className="px-4 py-3 rounded-2xl rounded-bl-sm bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-white/20 dark:border-white/5 shadow-sm flex items-center space-x-1.5 h-[42px]">
                     <div className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>
                     <div className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce" style={{ animationDelay: '150ms' }}></div>
                     <div className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce" style={{ animationDelay: '300ms' }}></div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             )}
             <div ref={messagesEndRef} />
           </>

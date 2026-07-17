@@ -12,6 +12,8 @@ import ChatWindow from './components/chat/ChatWindow';
 import SettingsModal from './components/chat/SettingsModal';
 import CallOverlay from './components/call/CallOverlay';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AnimatedBackground from './components/ui/AnimatedBackground';
+import PageTransition from './components/ui/PageTransition';
 
 const MainLayout: React.FC = () => {
   const { user, loading } = useAuth();
@@ -34,22 +36,24 @@ const MainLayout: React.FC = () => {
   if (!user) {
     return (
       <div className="h-[100dvh] w-full flex items-center justify-center bg-slate-900 overflow-hidden relative">
-        <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-brand-600/10 blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-indigo-600/10 blur-[120px] animate-pulse" />
+        <AnimatedBackground />
 
         <div className="z-10 w-full px-4 flex justify-center">
-          {isLoginView ? (
-            <LoginCard onToggle={() => setIsLoginView(false)} />
-          ) : (
-            <RegisterCard onToggle={() => setIsLoginView(true)} />
-          )}
+          <PageTransition>
+            {isLoginView ? (
+              <LoginCard onToggle={() => setIsLoginView(false)} />
+            ) : (
+              <RegisterCard onToggle={() => setIsLoginView(true)} />
+            )}
+          </PageTransition>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-[100dvh] w-full flex overflow-hidden mesh-bg-light dark:mesh-bg-dark relative">
+    <div className="h-[100dvh] w-full flex overflow-hidden relative text-slate-800 dark:text-slate-100 selection:bg-brand-500/30">
+      <AnimatedBackground />
       <div className={`h-full shrink-0 w-full md:w-80 glass-panel border-r border-slate-200/20 dark:border-white/5 ${activeChat ? 'hidden md:block' : 'block'}`}>
         <Sidebar onOpenSettings={() => setShowSettings(true)} />
       </div>

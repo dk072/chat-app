@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Mail, Lock, User, Loader2, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight } from 'lucide-react';
+import GlassCard from '../ui/GlassCard';
+import MotionInput from '../ui/MotionInput';
+import MotionButton from '../ui/MotionButton';
 
 interface RegisterCardProps {
   onToggle: () => void;
@@ -51,9 +54,9 @@ const RegisterCard: React.FC<RegisterCardProps> = ({ onToggle }) => {
   };
 
   return (
-    <div className="w-full max-w-md p-8 rounded-3xl glass-panel shadow-glass-dark transition-all duration-300">
+    <GlassCard className="w-full max-w-md p-8" variant="auto">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-brand-400 to-indigo-500 bg-clip-text text-transparent">
+        <h2 className="text-3xl font-outfit font-extrabold tracking-tight bg-gradient-to-r from-brand-400 to-indigo-500 bg-clip-text text-transparent">
           Get Started
         </h2>
         <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
@@ -68,101 +71,60 @@ const RegisterCard: React.FC<RegisterCardProps> = ({ onToggle }) => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-            Username
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <User className="w-5 h-5" />
-            </div>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="e.g. alice"
-              className="block w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent focus:border-brand-500 focus:bg-white dark:focus:bg-black focus:outline-none text-sm transition-all duration-200"
-              disabled={loading}
-              required
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-            Email
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <Mail className="w-5 h-5" />
-            </div>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="e.g. alice@chatapp.com"
-              className="block w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent focus:border-brand-500 focus:bg-white dark:focus:bg-black focus:outline-none text-sm transition-all duration-200"
-              disabled={loading}
-              required
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-            Password
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <Lock className="w-5 h-5" />
-            </div>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="block w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent focus:border-brand-500 focus:bg-white dark:focus:bg-black focus:outline-none text-sm transition-all duration-200"
-              disabled={loading}
-              required
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-            Confirm Password
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <Lock className="w-5 h-5" />
-            </div>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="••••••••"
-              className="block w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent focus:border-brand-500 focus:bg-white dark:focus:bg-black focus:outline-none text-sm transition-all duration-200"
-              disabled={loading}
-              required
-            />
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          className="w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl text-white font-semibold text-sm bg-gradient-to-tr from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 hover:shadow-lg hover:shadow-brand-500/20 active:scale-[0.98] disabled:scale-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 mt-2"
-          style={{ backgroundColor: 'rgb(var(--accent-color))' }}
+        <MotionInput
+          label="Username"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="e.g. alice"
+          icon={<User className="w-5 h-5" />}
           disabled={loading}
+          required
+        />
+
+        <MotionInput
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="e.g. alice@chatapp.com"
+          icon={<Mail className="w-5 h-5" />}
+          disabled={loading}
+          required
+        />
+
+        <MotionInput
+          label="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="••••••••"
+          icon={<Lock className="w-5 h-5" />}
+          disabled={loading}
+          required
+        />
+
+        <MotionInput
+          label="Confirm Password"
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="••••••••"
+          icon={<Lock className="w-5 h-5" />}
+          disabled={loading}
+          required
+        />
+
+        <MotionButton
+          type="submit"
+          variant="primary"
+          size="lg"
+          className="w-full mt-2"
+          isLoading={loading}
         >
-          {loading ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <>
-              <span>Register</span>
-              <ArrowRight className="w-4 h-4" />
-            </>
-          )}
-        </button>
+          <span className="mr-2">Register</span>
+          <ArrowRight className="w-4 h-4" />
+        </MotionButton>
       </form>
 
       <div className="mt-6 text-center text-sm">
@@ -175,7 +137,7 @@ const RegisterCard: React.FC<RegisterCardProps> = ({ onToggle }) => {
           Sign In
         </button>
       </div>
-    </div>
+    </GlassCard>
   );
 };
 

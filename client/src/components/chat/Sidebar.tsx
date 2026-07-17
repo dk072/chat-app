@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useChat } from '../../context/ChatContext';
 import { Search, Settings, Pin, MessageSquare, Check, CheckCheck, Loader2 } from 'lucide-react';
-import Avatar from '../ui/Avatar';
+import { motion, AnimatePresence } from 'framer-motion';
+import AnimatedAvatar from '../ui/AnimatedAvatar';
 import { SidebarSkeleton } from '../ui/Skeleton';
 import api from '../../services/api';
 import { Conversation, User } from '../../types';
@@ -94,10 +95,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onOpenSettings }) => {
       {/* Header */}
       <div className="px-5 py-4 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-700/50 bg-white/30 dark:bg-slate-950/30 backdrop-blur-md">
         <div className="flex items-center space-x-3">
-          <Avatar src={user?.profilePicture} name={user?.username || ''} size="sm" />
+          <AnimatedAvatar src={user?.profilePicture} name={user?.username || ''} size="sm" isOnline={true} />
           <div className="leading-tight">
             <h1 className="font-bold font-outfit text-base truncate max-w-[120px]">{user?.username}</h1>
-            <span className="text-[10px] text-slate-400 capitalize">{user?.role}</span>
+            <span className="text-[10px] text-brand-500 font-semibold capitalize">{user?.role}</span>
           </div>
         </div>
         <button
@@ -158,12 +159,16 @@ const Sidebar: React.FC<SidebarProps> = ({ onOpenSettings }) => {
               </div>
             ) : globalResults.length > 0 ? (
               globalResults.map((result) => (
-                <div
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
                   key={result.id}
                   onClick={() => handleStartChat(result.id)}
-                  className="flex items-center space-x-3 p-3 rounded-2xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+                  className="flex items-center space-x-3 p-3 rounded-2xl cursor-pointer hover:bg-white/60 dark:hover:bg-slate-800/50 transition-colors backdrop-blur-sm"
                 >
-                  <Avatar
+                  <AnimatedAvatar
                     src={result.profilePicture}
                     name={result.username}
                     isOnline={result.isOnline}
@@ -173,7 +178,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onOpenSettings }) => {
                     <h4 className="text-sm font-semibold truncate">{result.username}</h4>
                     <p className="text-xs text-slate-400 truncate">{result.bio}</p>
                   </div>
-                </div>
+                </motion.div>
               ))
             ) : searchQuery.trim() !== '' ? (
               <div className="text-center py-8 text-xs text-slate-400">No users found.</div>
@@ -193,17 +198,27 @@ const Sidebar: React.FC<SidebarProps> = ({ onOpenSettings }) => {
               const lastMsg = c.lastMessage;
 
               return (
-                <div
+                <motion.div
+                  layoutId={`chat-item-${c.id}`}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2 }}
                   key={c.id}
                   onClick={() => selectChat(c)}
-                  className={`flex items-center space-x-3 p-3 rounded-2xl cursor-pointer transition-all duration-300 ${
+                  className={`flex items-center space-x-3 p-3 rounded-2xl cursor-pointer transition-all duration-300 relative group overflow-hidden ${
                     isSelected
-                      ? 'bg-gradient-to-r from-brand-500/20 to-brand-500/5 dark:from-brand-500/30 dark:to-brand-500/5 shadow-[inset_3px_0_0_0_#8b5cf6] border border-brand-500/20'
+                      ? 'bg-gradient-to-r from-brand-500/20 to-indigo-500/10 dark:from-brand-500/30 dark:to-brand-500/5 shadow-glass-light dark:shadow-glass-dark border border-brand-500/30'
                       : 'hover:bg-white/60 dark:hover:bg-slate-800/50 hover:shadow-sm border border-transparent'
                   }`}
                 >
+                  {isSelected && (
+                    <motion.div 
+                      layoutId="active-chat-highlight"
+                      className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-500 to-indigo-600 rounded-r-full"
+                    />
+                  )}
                   {/* Avatar wrapper */}
-                  <Avatar
+                  <AnimatedAvatar
                     src={c.partner.profilePicture}
                     name={c.partner.username}
                     isOnline={c.partner.isOnline}
@@ -272,7 +287,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onOpenSettings }) => {
                       </div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
