@@ -7,7 +7,7 @@ async function main() {
   console.log('Seeding database...');
 
   // Standard password hashes
-  const adminPasswordHash = await bcrypt.hash('AdminPassword123', 10);
+  const adminPasswordHash = await bcrypt.hash('admin', 10);
   const userPasswordHash = await bcrypt.hash('UserPassword123', 10);
 
   // 1. Create Admin User
