@@ -5,7 +5,7 @@ services:
     env: node
     plan: free
     rootDir: server
-    buildCommand: npm install --include=dev && npm run build:render
+    buildCommand: npm install --include=dev && npm run build:render && npm run db:seed
     startCommand: npm start
     envVars:
       - key: PORT
