@@ -35,7 +35,7 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
-        value: https://chime-backend.onrender.com/api # IMPORTANT: Replace with actual backend URL
+        value: https://chime-backend-n031.onrender.com/api
 
 # PostgreSQL Database Service configuration
 databases:
