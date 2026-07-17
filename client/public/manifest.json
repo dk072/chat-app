@@ -1,0 +1,21 @@
+{
+  "short_name": "Chime",
+  "name": "Chime Premium Real-Time Chat",
+  "start_url": "/",
+  "background_color": "#0b0f19",
+  "theme_color": "#4f46e5",
+  "display": "standalone",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22 width=%22192%22 height=%22192%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%234f46e5%22 rx=%2240%22/><text x=%2250%25%22 y=%2265%25%22 font-size=%22100%22 text-anchor=%22middle%22>💬</text></svg>",
+      "type": "image/svg+xml",
+      "sizes": "192x192"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22 width=%22512%22 height=%22512%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%234f46e5%22 rx=%22100%22/><text x=%2250%25%22 y=%2265%25%22 font-size=%22260%22 text-anchor=%22middle%22>💬</text></svg>",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    }
+  ]
+}

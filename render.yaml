@@ -1,0 +1,32 @@
+services:
+  # Chime Backend Web Service configuration
+  - type: web
+    name: chime-backend
+    env: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install && npm run build:render
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: chime-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true # Generates a secure random JWT key automatically
+      - key: JWT_EXPIRY
+        value: 7d
+      - key: CLIENT_URL
+        value: https://chime-client.onrender.com # Change this to your frontend URL after client deployment
+      - key: UPLOAD_DIR
+        value: ./uploads
+
+# PostgreSQL Database Service configuration
+databases:
+  - name: chime-db
+    plan: free
+    postgresMajorVersion: 15
