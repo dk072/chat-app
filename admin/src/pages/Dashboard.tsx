@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Users, AlertOctagon, BarChart2, Shield, LogOut, Search, Ban, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { User, Report, AdminStats } from '../types';
+import type { User, Report, AdminStats } from '../types';
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'users' | 'reports' | 'analytics'>('users');
