@@ -21,7 +21,7 @@ services:
       - key: JWT_EXPIRY
         value: 7d
       - key: CLIENT_URL
-        value: https://chime-client.onrender.com # Change this to your frontend URL after client deployment
+        value: https://chat-app-ivory-nu-89.vercel.app
       - key: UPLOAD_DIR
         value: ./uploads
 
