@@ -78,7 +78,7 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-server.listen(Number(PORT), '0.0.0.0', () => {
+server.listen(Number(PORT), () => {
   console.log(`==================================================`);
   console.log(`  Server is actively listening on port ${PORT}`);
   console.log(`  Running in [${process.env.NODE_ENV || 'development'}] mode`);
