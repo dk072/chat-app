@@ -56,6 +56,9 @@ model Conversation {
 
   // Unique index to prevent duplicate 1-to-1 conversations between same two users
   @@unique([user1Id, user2Id])
+  @@index([updatedAt(sort: Desc)])
+  @@index([user1Id])
+  @@index([user2Id])
 }
 
 model Message {
@@ -94,7 +97,7 @@ model Message {
   conversation         Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender               User          @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
 
-  @@index([conversationId])
+  @@index([conversationId, createdAt(sort: Desc)])
 }
 
 model PinnedChat {

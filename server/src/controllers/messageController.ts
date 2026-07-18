@@ -35,38 +35,48 @@ export const getConversations = async (req: Request, res: Response) => {
       orderBy: { updatedAt: 'desc' },
     });
 
-    const formatted = await Promise.all(
-      conversations.map(async (c) => {
-        const partner = c.user1Id === userId ? c.user2 : c.user1;
-        const lastMsg = c.messages[0] || null;
-        const isPinned = c.pinnedChats.length > 0;
+    // Batch query to get all unread message counts in a single query
+    const unreadCountsData = await prisma.message.groupBy({
+      by: ['conversationId'],
+      where: {
+        conversationId: { in: conversations.map(c => c.id) },
+        senderId: { not: userId },
+        isSeen: false,
+        isDeletedForEveryone: false,
+        NOT: {
+          deletedForUsers: { contains: `,${userId},` },
+        },
+      },
+      _count: {
+        id: true,
+      },
+    });
 
-        // Skip listing if user deleted all messages or hasn't chatted, but keep conversation record
-        // Filter out if last message is deleted locally for the user
-        const lastMsgDeletedLocally = lastMsg ? lastMsg.deletedForUsers.includes(`,${userId},`) : false;
+    const unreadCountsMap = new Map();
+    for (const data of unreadCountsData) {
+      unreadCountsMap.set(data.conversationId, data._count.id);
+    }
 
-        const unreadCount = await prisma.message.count({
-          where: {
-            conversationId: c.id,
-            senderId: { not: userId },
-            isSeen: false,
-            isDeletedForEveryone: false,
-            NOT: {
-              deletedForUsers: { contains: `,${userId},` },
-            },
-          },
-        });
+    const formatted = conversations.map((c) => {
+      const partner = c.user1Id === userId ? c.user2 : c.user1;
+      const lastMsg = c.messages[0] || null;
+      const isPinned = c.pinnedChats.length > 0;
 
-        return {
-          id: c.id,
-          partner,
-          lastMessage: lastMsgDeletedLocally ? null : lastMsg,
-          unreadCount,
-          isPinned,
-          updatedAt: c.updatedAt,
-        };
-      })
-    );
+      // Skip listing if user deleted all messages or hasn't chatted, but keep conversation record
+      // Filter out if last message is deleted locally for the user
+      const lastMsgDeletedLocally = lastMsg ? lastMsg.deletedForUsers.includes(`,${userId},`) : false;
+
+      const unreadCount = unreadCountsMap.get(c.id) || 0;
+
+      return {
+        id: c.id,
+        partner,
+        lastMessage: lastMsgDeletedLocally ? null : lastMsg,
+        unreadCount,
+        isPinned,
+        updatedAt: c.updatedAt,
+      };
+    });
 
     // Sort pinned conversations to the top, then sort by last update time
     formatted.sort((a, b) => {

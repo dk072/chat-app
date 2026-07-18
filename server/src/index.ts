@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
+import compression from 'compression';
 
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
@@ -36,6 +37,7 @@ app.set('io', io);
 initializeSocket(io);
 
 // Core Middlewares
+app.use(compression());
 app.use(
   helmet({
     crossOriginResourcePolicy: false, // Ensures local uploads can be loaded cross-origin
