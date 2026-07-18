@@ -698,9 +698,9 @@ const ChatWindow: React.FC = () => {
                           {/* 1. Image Render */}
                           {m.type === 'IMAGE' && m.fileUrl && (
                             <div className="rounded-xl overflow-hidden max-w-sm border border-black/10">
-                              <a href={m.fileUrl} target="_blank" rel="noreferrer">
+                              <a href={import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}${m.fileUrl}` : m.fileUrl} target="_blank" rel="noreferrer">
                                 <img
-                                  src={m.fileUrl}
+                                  src={import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}${m.fileUrl}` : m.fileUrl}
                                   alt="attachment"
                                   className="object-cover w-full max-h-72 hover:scale-[1.01] transition-transform duration-200"
                                 />
@@ -711,17 +711,17 @@ const ChatWindow: React.FC = () => {
                           {/* 2. Video Render */}
                           {m.type === 'VIDEO' && m.fileUrl && (
                             <div className="rounded-xl overflow-hidden max-w-sm border border-black/10">
-                              <video src={m.fileUrl} controls className="w-full max-h-72" />
+                              <video src={import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}${m.fileUrl}` : m.fileUrl} controls className="w-full max-h-72" />
                             </div>
                           )}
 
                           {/* 3. Voice Player */}
-                          {m.type === 'VOICE' && m.fileUrl && <VoicePlayer url={m.fileUrl} />}
+                          {m.type === 'VOICE' && m.fileUrl && <VoicePlayer url={import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}${m.fileUrl}` : m.fileUrl} />}
 
                           {/* 4. PDF / Generic Document download bar */}
                           {m.type === 'FILE' && m.fileUrl && (
                             <a
-                              href={m.fileUrl}
+                              href={import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}${m.fileUrl}` : m.fileUrl}
                               download={m.fileName || 'attachment'}
                               target="_blank"
                               rel="noreferrer"
