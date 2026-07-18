@@ -4,9 +4,9 @@ echo   CHIME - BACKEND CONFIGURATION AND STARTUP (SQLite)
 echo ==================================================
 
 echo.
-echo [1/4] Enforcing SQLite environment configuration...
-copy /Y "server\.env.example" "server\.env" >nul
-echo Server environment set to local SQLite database (dev.db).
+echo [1/4] Using existing .env configuration...
+rem copy /Y "server\.env.example" "server\.env" >nul
+echo Server environment is configured via server\.env
 
 echo.
 echo [2/4] Installing server dependencies...
