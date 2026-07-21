@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import prisma from '../config/db';
-import { getActiveConnections } from '../services/socketService';
 import { Server } from 'socket.io';
 
 /**
@@ -122,18 +121,12 @@ export const toggleBanUser = async (req: Request, res: Response) => {
 
     // Terminate socket connections if user was banned
     if (nextBanStatus) {
-      const socketConnections = getActiveConnections();
-      const userSockets = socketConnections.get(userId);
+      const userRoom = `user_${userId}`;
+      const userSockets = await io.in(userRoom).fetchSockets();
 
-      if (userSockets) {
-        userSockets.forEach((socketId) => {
-          const socket = io.sockets.sockets.get(socketId);
-          if (socket) {
-            socket.emit('banned', { message: 'Your account has been suspended by an administrator.' });
-            socket.disconnect(true);
-          }
-        });
-        socketConnections.delete(userId);
+      for (const socket of userSockets) {
+        socket.emit('banned', { message: 'Your account has been suspended by an administrator.' });
+        socket.disconnect(true);
       }
     }
 

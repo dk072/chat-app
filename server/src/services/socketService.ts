@@ -2,9 +2,6 @@ import { Server, Socket } from 'socket.io';
 import { verifyToken } from '../utils/jwt';
 import prisma from '../config/db';
 
-// Maps User IDs to sets of active Socket IDs (supporting multiple browser tabs per user)
-const activeConnections = new Map<string, Set<string>>();
-
 export const initializeSocket = (io: Server) => {
   // Middleware: Authenticate socket handshake using JWT
   io.use((socket, next) => {
@@ -27,11 +24,9 @@ export const initializeSocket = (io: Server) => {
     const userId = socket.data.userId;
     if (!userId) return;
 
-    // Register socket connection
-    if (!activeConnections.has(userId)) {
-      activeConnections.set(userId, new Set());
-    }
-    activeConnections.get(userId)!.add(socket.id);
+    // Join a dedicated room for this user to support Redis clustering and multiple tabs
+    const userRoom = `user_${userId}`;
+    socket.join(userRoom);
 
     console.log(`Socket connected: ${socket.id} (User ID: ${userId})`);
 
@@ -77,19 +72,17 @@ export const initializeSocket = (io: Server) => {
     // WebRTC Calling System
     // =======================
 
-    // Helper to send to a specific user's active sockets
+    // Helper to send to a specific user's active sockets using Redis/Room routing
     const emitToPartner = (partnerId: string, event: string, payload: any) => {
-      const partnerSockets = activeConnections.get(partnerId);
-      if (partnerSockets) {
-        partnerSockets.forEach((sid) => io.to(sid).emit(event, payload));
-      }
+      io.to(`user_${partnerId}`).emit(event, payload);
     };
 
     socket.on('call:start', async (data: { receiverId: string, callType: 'VOICE' | 'VIDEO', conversationId: string }) => {
       const { receiverId, callType, conversationId } = data;
       
-      const receiverSockets = activeConnections.get(receiverId);
-      if (!receiverSockets || receiverSockets.size === 0) {
+      // Check if receiver has active sockets across the cluster
+      const receiverSockets = await io.in(`user_${receiverId}`).fetchSockets();
+      if (!receiverSockets || receiverSockets.length === 0) {
         // Receiver is offline -> Missed Call
         try {
           await prisma.call.create({
@@ -214,32 +207,29 @@ export const initializeSocket = (io: Server) => {
     socket.on('disconnect', async () => {
       console.log(`Socket disconnected: ${socket.id}`);
       
-      const socketSet = activeConnections.get(userId);
-      if (socketSet) {
-        socketSet.delete(socket.id);
-        
-        // If all tabs/sockets of this user are closed
-        if (socketSet.size === 0) {
-          activeConnections.delete(userId);
-          
-          try {
-            const lastSeen = new Date();
-            const user = await prisma.user.update({
-              where: { id: userId },
-              data: { isOnline: false, lastSeen },
-              select: { status: true },
-            });
+      // Since socket leaves rooms automatically, we need to fetch sockets in the room
+      // to check if it was the last connection for this user across the cluster.
+      const remainingSockets = await io.in(`user_${userId}`).fetchSockets();
+      
+      // If all tabs/sockets of this user are closed across all servers
+      if (remainingSockets.length === 0) {
+        try {
+          const lastSeen = new Date();
+          const user = await prisma.user.update({
+            where: { id: userId },
+            data: { isOnline: false, lastSeen },
+            select: { status: true },
+          });
 
-            // Broadcast offline state with lastSeen timestamp
-            io.emit('user_status', {
-              userId,
-              isOnline: false,
-              status: user.status,
-              lastSeen: lastSeen.toISOString(),
-            });
-          } catch (err) {
-            console.error('Socket disconnect status update failed:', err);
-          }
+          // Broadcast offline state with lastSeen timestamp
+          io.emit('user_status', {
+            userId,
+            isOnline: false,
+            status: user.status,
+            lastSeen: lastSeen.toISOString(),
+          });
+        } catch (err) {
+          console.error('Socket disconnect status update failed:', err);
         }
       }
     });
@@ -250,15 +240,5 @@ export const initializeSocket = (io: Server) => {
  * Sends a real-time event directly to a user's active sockets
  */
 export const emitToUser = (io: Server, userId: string, eventName: string, payload: any) => {
-  const socketSet = activeConnections.get(userId);
-  if (socketSet) {
-    socketSet.forEach((socketId) => {
-      io.to(socketId).emit(eventName, payload);
-    });
-  }
+  io.to(`user_${userId}`).emit(eventName, payload);
 };
-
-/**
- * Returns the current map of active connections
- */
-export const getActiveConnections = () => activeConnections;

@@ -1,5 +1,7 @@
 import express from 'express';
 import http from 'http';
+import { createClient } from 'redis';
+import { createAdapter } from '@socket.io/redis-adapter';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -32,6 +34,21 @@ const io = new Server(server, {
 
 // Expose Socket instance to Express controllers via req.app.get('io')
 app.set('io', io);
+
+// Redis Adapter Setup for Horizontal Scaling
+if (process.env.REDIS_URL) {
+  const pubClient = createClient({ url: process.env.REDIS_URL });
+  const subClient = pubClient.duplicate();
+
+  Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
+    io.adapter(createAdapter(pubClient, subClient));
+    console.log(`[Redis] Connected and Socket.io adapter attached.`);
+  }).catch((err) => {
+    console.error(`[Redis] Failed to connect:`, err);
+  });
+} else {
+  console.log(`[Redis] REDIS_URL not set. Falling back to local memory adapter.`);
+}
 
 // Setup Socket lifecycle handlers
 initializeSocket(io);
