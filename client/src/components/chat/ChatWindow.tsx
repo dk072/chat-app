@@ -687,8 +687,8 @@ const ChatWindow: React.FC = () => {
                     <div
                       className={`p-3.5 rounded-2xl relative select-text shadow-sm transition-all hover:shadow-md ${
                         isSelf
-                          ? 'bg-gradient-to-br from-brand-500 to-indigo-600 text-white rounded-br-none bubble-tail-self shadow-brand-500/30'
-                          : 'bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-slate-100 rounded-bl-none bubble-tail-other border border-white/20 dark:border-white/5'
+                          ? 'bg-gradient-to-br from-brand-500 to-indigo-600 text-white rounded-tr-none bubble-tail-self shadow-brand-500/30'
+                          : 'bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-slate-100 rounded-tl-none bubble-tail-other border border-white/20 dark:border-white/5'
                       }`}
                     >
                       {/* Reply preview Quote inside bubble */}
