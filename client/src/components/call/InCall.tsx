@@ -19,7 +19,7 @@ const InCall: React.FC = () => {
   const { conversations } = useChat();
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
-  const remoteMediaRef = useRef<HTMLVideoElement & HTMLAudioElement>(null);
+  const remoteMediaRef = useRef<any>(null);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
@@ -35,6 +35,7 @@ const InCall: React.FC = () => {
   useEffect(() => {
     if (remoteMediaRef.current && remoteStream) {
       remoteMediaRef.current.srcObject = remoteStream;
+      remoteMediaRef.current.play().catch((e: any) => console.error('Failed to play remote stream:', e));
     }
   }, [remoteStream, callType]);
 
@@ -80,9 +81,20 @@ const InCall: React.FC = () => {
             <Avatar src={partner.profilePicture} name={partner.username} size={isFullscreen ? 'lg' : 'md'} />
             {isFullscreen && <h2 className="text-white text-2xl font-semibold">{partner.username}</h2>}
             <div className="text-brand-400 font-mono text-xl">{formatDuration(duration)}</div>
-            {/* Hidden audio element for voice calls */}
+            {/* Visually hidden audio element for voice calls (display: none can break playback on some browsers) */}
             {remoteStream && (
-              <audio ref={remoteMediaRef} autoPlay playsInline className="hidden" />
+              <audio 
+                ref={(el) => {
+                  if (el && el.srcObject !== remoteStream) {
+                    el.srcObject = remoteStream;
+                    el.play().catch((e: any) => console.error('Audio play failed:', e));
+                  }
+                  remoteMediaRef.current = el as any;
+                }} 
+                autoPlay 
+                playsInline 
+                className="absolute opacity-0 w-0 h-0 pointer-events-none" 
+              />
             )}
           </div>
         )}
