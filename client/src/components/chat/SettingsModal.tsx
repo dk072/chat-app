@@ -17,6 +17,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onOpenAd
 
   const [username, setUsername] = useState(user?.username || '');
   const [bio, setBio] = useState(user?.bio || '');
+  const [status, setStatus] = useState<'ONLINE' | 'AWAY' | 'BUSY' | 'OFFLINE'>(user?.status || 'ONLINE');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.profilePicture || null);
   const [loading, setLoading] = useState(false);
@@ -48,6 +49,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onOpenAd
     const formData = new FormData();
     formData.append('username', username);
     formData.append('bio', bio);
+    formData.append('status', status);
     if (avatarFile) {
       formData.append('avatar', avatarFile);
     }
@@ -150,6 +152,22 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onOpenAd
                 className="block w-full px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent focus:border-brand-500 focus:outline-none text-sm transition-all"
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Presence Status
+              </label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as any)}
+                className="block w-full px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent focus:border-brand-500 focus:outline-none text-sm transition-all"
+              >
+                <option value="ONLINE">🟢 Online</option>
+                <option value="AWAY">🟡 Away</option>
+                <option value="BUSY">🔴 Busy</option>
+                <option value="OFFLINE">⚪ Offline</option>
+              </select>
             </div>
 
             <div className="space-y-2">

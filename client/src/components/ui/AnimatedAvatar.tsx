@@ -6,6 +6,7 @@ interface AnimatedAvatarProps {
   name: string;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   isOnline?: boolean;
+  status?: 'ONLINE' | 'AWAY' | 'BUSY' | 'OFFLINE';
   className?: string;
   onClick?: () => void;
 }
@@ -15,6 +16,7 @@ const AnimatedAvatar: React.FC<AnimatedAvatarProps> = ({
   name, 
   size = 'md', 
   isOnline, 
+  status,
   className = '',
   onClick
 }) => {
@@ -30,6 +32,19 @@ const AnimatedAvatar: React.FC<AnimatedAvatarProps> = ({
   const getInitials = (n: string) => {
     return n.slice(0, 2).toUpperCase();
   };
+
+  const getStatusColor = () => {
+    if (!isOnline || status === 'OFFLINE') return 'bg-slate-400';
+    switch (status) {
+      case 'AWAY': return 'bg-amber-500';
+      case 'BUSY': return 'bg-rose-500';
+      case 'ONLINE':
+      default: return 'bg-emerald-500';
+    }
+  };
+
+  const isActuallyOnline = isOnline && status !== 'OFFLINE';
+  const indicatorSizeClass = size === 'xs' ? 'w-2 h-2' : size === 'sm' ? 'w-2.5 h-2.5' : size === 'md' ? 'w-3 h-3' : size === 'lg' ? 'w-3.5 h-3.5' : 'w-4 h-4';
 
   return (
     <div className={`relative inline-block ${onClick ? 'cursor-pointer' : ''} ${className}`} onClick={onClick}>
@@ -52,13 +67,13 @@ const AnimatedAvatar: React.FC<AnimatedAvatarProps> = ({
       {isOnline !== undefined && (
         <div className="absolute bottom-0 right-0 z-20">
           <div className="relative">
-            {isOnline ? (
+            {isActuallyOnline ? (
               <>
-                <div className={`rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900 ${size === 'xs' ? 'w-2 h-2' : size === 'sm' ? 'w-2.5 h-2.5' : size === 'md' ? 'w-3 h-3' : size === 'lg' ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
-                <div className={`absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-75`} />
+                <div className={`rounded-full ${getStatusColor()} border-2 border-white dark:border-slate-900 ${indicatorSizeClass}`} />
+                <div className={`absolute inset-0 rounded-full ${getStatusColor()} animate-ping opacity-75`} />
               </>
             ) : (
-              <div className={`rounded-full bg-slate-400 border-2 border-white dark:border-slate-900 ${size === 'xs' ? 'w-2 h-2' : size === 'sm' ? 'w-2.5 h-2.5' : size === 'md' ? 'w-3 h-3' : size === 'lg' ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+              <div className={`rounded-full ${getStatusColor()} border-2 border-white dark:border-slate-900 ${indicatorSizeClass}`} />
             )}
           </div>
         </div>

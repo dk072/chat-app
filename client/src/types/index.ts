@@ -6,6 +6,7 @@ export interface User {
   profilePicture?: string;
   lastSeen: string;
   isOnline: boolean;
+  status?: 'ONLINE' | 'AWAY' | 'BUSY' | 'OFFLINE';
   role: 'USER' | 'ADMIN';
   createdAt: string;
   isBanned?: boolean;
@@ -52,6 +53,7 @@ export interface Conversation {
     username: string;
     profilePicture: string;
     isOnline: boolean;
+    status?: 'ONLINE' | 'AWAY' | 'BUSY' | 'OFFLINE';
     lastSeen: string;
     bio?: string;
   };

@@ -5,6 +5,7 @@ interface AvatarProps {
   name: string;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   isOnline?: boolean;
+  status?: 'ONLINE' | 'AWAY' | 'BUSY' | 'OFFLINE';
   onClick?: () => void;
   className?: string;
 }
@@ -14,6 +15,7 @@ const Avatar: React.FC<AvatarProps> = ({
   name,
   size = 'md',
   isOnline = false,
+  status,
   onClick,
   className = '',
 }) => {
@@ -44,6 +46,18 @@ const Avatar: React.FC<AvatarProps> = ({
     xl: 'w-6 h-6 border-4',
   };
 
+  const getStatusColor = () => {
+    if (!isOnline || status === 'OFFLINE') return 'hidden';
+    switch (status) {
+      case 'AWAY': return 'bg-amber-500';
+      case 'BUSY': return 'bg-rose-500';
+      case 'ONLINE':
+      default: return 'bg-emerald-500';
+    }
+  };
+
+  const showIndicator = isOnline && status !== 'OFFLINE';
+
   return (
     <div
       onClick={onClick}
@@ -69,9 +83,9 @@ const Avatar: React.FC<AvatarProps> = ({
       )}
 
       {/* Online indicator dot */}
-      {isOnline && (
+      {showIndicator && (
         <span
-          className={`absolute bottom-0 right-0 rounded-full bg-emerald-500 border-2 border-chat-panel-light dark:border-chat-panel-dark animate-pulse shadow-md ${indicatorSizes[size]}`}
+          className={`absolute bottom-0 right-0 rounded-full ${getStatusColor()} border-2 border-chat-panel-light dark:border-chat-panel-dark animate-pulse shadow-md ${indicatorSizes[size]}`}
         />
       )}
     </div>

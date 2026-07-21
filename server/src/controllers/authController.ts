@@ -50,6 +50,7 @@ export const register = async (req: Request, res: Response) => {
         bio: true,
         profilePicture: true,
         role: true,
+        status: true,
         createdAt: true,
       },
     });
@@ -127,6 +128,7 @@ export const login = async (req: Request, res: Response) => {
         bio: user.bio,
         profilePicture: user.profilePicture,
         role: user.role,
+        status: user.status,
         createdAt: user.createdAt,
       },
       token,
@@ -158,6 +160,7 @@ export const me = async (req: Request, res: Response) => {
         bio: true,
         profilePicture: true,
         role: true,
+        status: true,
         createdAt: true,
       },
     });

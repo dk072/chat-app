@@ -422,6 +422,7 @@ const ChatWindow: React.FC = () => {
             src={activeChat.partner.profilePicture}
             name={activeChat.partner.username}
             isOnline={activeChat.partner.isOnline}
+            status={activeChat.partner.status}
             size="sm"
           />
           <div className="leading-tight min-w-0">
@@ -837,6 +838,7 @@ const ChatWindow: React.FC = () => {
                     src={activeChat.partner.profilePicture}
                     name={activeChat.partner.username}
                     size="sm"
+                    status={activeChat.partner.status}
                   />
                   <div className="px-4 py-3 rounded-2xl rounded-bl-sm bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-white/20 dark:border-white/5 shadow-sm flex items-center space-x-1.5 h-[42px]">
                     <div className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>

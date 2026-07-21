@@ -160,6 +160,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
                     src={result.profilePicture}
                     name={result.username}
                     isOnline={result.isOnline}
+                    status={result.status}
                     size="sm"
                   />
                   <div className="flex-1 min-w-0">
@@ -205,11 +206,11 @@ const Sidebar: React.FC<SidebarProps> = () => {
                       className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-500 to-indigo-600 rounded-r-full"
                     />
                   )}
-                  {/* Avatar wrapper */}
                   <AnimatedAvatar
                     src={c.partner.profilePicture}
                     name={c.partner.username}
                     isOnline={c.partner.isOnline}
+                    status={c.partner.status}
                     size="sm"
                   />
 

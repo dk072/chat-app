@@ -23,4 +23,5 @@ export const updateProfileSchema = z.object({
     .max(30)
     .regex(/^[a-zA-Z0-9_]+$/)
     .optional(),
+  status: z.enum(['ONLINE', 'AWAY', 'BUSY', 'OFFLINE']).optional(),
 });

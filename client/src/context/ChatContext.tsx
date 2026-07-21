@@ -339,12 +339,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     // 5. User online/offline status updates
-    socket.on('user_status', ({ userId, isOnline, lastSeen }: { userId: string; isOnline: boolean; lastSeen: string }) => {
+    socket.on('user_status', ({ userId, isOnline, status, lastSeen }: { userId: string; isOnline: boolean; status?: 'ONLINE' | 'AWAY' | 'BUSY' | 'OFFLINE'; lastSeen: string }) => {
       // Sync sidebar list
       setConversations((prev) =>
         prev.map((c) =>
           c.partner.id === userId
-            ? { ...c, partner: { ...c.partner, isOnline, lastSeen } }
+            ? { ...c, partner: { ...c.partner, isOnline, status, lastSeen } }
             : c
         )
       );
@@ -354,7 +354,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (active && active.partner.id === userId) {
         setActiveChat((prev) =>
           prev
-            ? { ...prev, partner: { ...prev.partner, isOnline, lastSeen } }
+            ? { ...prev, partner: { ...prev.partner, isOnline, status, lastSeen } }
             : null
         );
       }

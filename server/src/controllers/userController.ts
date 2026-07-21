@@ -36,6 +36,7 @@ export const searchUsers = async (req: Request, res: Response) => {
         profilePicture: true,
         bio: true,
         isOnline: true,
+        status: true,
         lastSeen: true,
       },
       take: 15,
@@ -61,10 +62,11 @@ export const updateProfile = async (req: Request, res: Response) => {
       return res.status(400).json({ message: validation.error.errors[0].message });
     }
 
-    const { bio, username } = validation.data;
+    const { bio, username, status } = validation.data;
     const updateData: any = {};
 
     if (bio !== undefined) updateData.bio = bio;
+    if (status !== undefined) updateData.status = status;
 
     if (username !== undefined) {
       const lowerUsername = username.toLowerCase();
@@ -97,6 +99,7 @@ export const updateProfile = async (req: Request, res: Response) => {
         bio: true,
         profilePicture: true,
         role: true,
+        status: true,
         createdAt: true,
       },
     });
@@ -126,6 +129,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
         profilePicture: true,
         bio: true,
         isOnline: true,
+        status: true,
         lastSeen: true,
       },
     });

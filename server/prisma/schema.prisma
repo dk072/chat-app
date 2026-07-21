@@ -16,6 +16,7 @@ model User {
   profilePicture String?        @default("https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg")
   lastSeen       DateTime       @default(now())
   isOnline       Boolean        @default(false)
+  status         String         @default("ONLINE") // "ONLINE", "AWAY", "BUSY", "OFFLINE"
   role           String         @default("USER") // "USER" or "ADMIN"
   isBanned       Boolean        @default(false)
   createdAt      DateTime       @default(now())

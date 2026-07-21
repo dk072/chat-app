@@ -40,12 +40,13 @@ export const initializeSocket = (io: Server) => {
       const user = await prisma.user.update({
         where: { id: userId },
         data: { isOnline: true },
-        select: { id: true, username: true, isOnline: true, lastSeen: true },
+        select: { id: true, username: true, isOnline: true, status: true, lastSeen: true },
       });
 
       io.emit('user_status', {
         userId: user.id,
         isOnline: true,
+        status: user.status,
         lastSeen: user.lastSeen.toISOString(),
       });
     } catch (err) {
@@ -223,15 +224,17 @@ export const initializeSocket = (io: Server) => {
           
           try {
             const lastSeen = new Date();
-            await prisma.user.update({
+            const user = await prisma.user.update({
               where: { id: userId },
               data: { isOnline: false, lastSeen },
+              select: { status: true },
             });
 
             // Broadcast offline state with lastSeen timestamp
             io.emit('user_status', {
               userId,
               isOnline: false,
+              status: user.status,
               lastSeen: lastSeen.toISOString(),
             });
           } catch (err) {
