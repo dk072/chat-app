@@ -38,7 +38,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
     onClick: () => void; 
     isActive?: boolean;
   }) => (
-    <div className="relative group flex items-center justify-center">
+    <div className="relative group flex items-center justify-center w-full md:w-full h-full md:h-auto">
       {isActive && (
         <motion.div
           layoutId="active-nav-indicator"
