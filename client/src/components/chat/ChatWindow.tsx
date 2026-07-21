@@ -13,6 +13,13 @@ import { MessagesSkeleton } from '../ui/Skeleton';
 import api from '../../services/api';
 import { Message, MessageType } from '../../types';
 
+const getFullUrl = (url?: string | null) => {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  const baseUrl = import.meta.env.VITE_API_URL || '';
+  return `${baseUrl}${url}`;
+};
+
 const ChatWindow: React.FC = () => {
   const { user } = useAuth();
   const {
@@ -699,9 +706,9 @@ const ChatWindow: React.FC = () => {
                           {/* 1. Image Render */}
                           {m.type === 'IMAGE' && m.fileUrl && (
                             <div className="rounded-xl overflow-hidden max-w-sm border border-black/10">
-                              <a href={import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}${m.fileUrl}` : m.fileUrl} target="_blank" rel="noreferrer">
+                              <a href={getFullUrl(m.fileUrl)} target="_blank" rel="noreferrer">
                                 <img
-                                  src={import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}${m.fileUrl}` : m.fileUrl}
+                                  src={getFullUrl(m.fileUrl)}
                                   alt="attachment"
                                   className="object-cover w-full max-h-72 hover:scale-[1.01] transition-transform duration-200"
                                 />
@@ -712,17 +719,17 @@ const ChatWindow: React.FC = () => {
                           {/* 2. Video Render */}
                           {m.type === 'VIDEO' && m.fileUrl && (
                             <div className="rounded-xl overflow-hidden max-w-sm border border-black/10">
-                              <video src={import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}${m.fileUrl}` : m.fileUrl} controls className="w-full max-h-72" />
+                              <video src={getFullUrl(m.fileUrl)} controls className="w-full max-h-72" />
                             </div>
                           )}
 
                           {/* 3. Voice Player */}
-                          {m.type === 'VOICE' && m.fileUrl && <VoicePlayer url={import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}${m.fileUrl}` : m.fileUrl} />}
+                          {m.type === 'VOICE' && m.fileUrl && <VoicePlayer url={getFullUrl(m.fileUrl)} />}
 
                           {/* 4. PDF / Generic Document download bar */}
                           {m.type === 'FILE' && m.fileUrl && (
                             <a
-                              href={import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}${m.fileUrl}` : m.fileUrl}
+                              href={getFullUrl(m.fileUrl)}
                               download={m.fileName || 'attachment'}
                               target="_blank"
                               rel="noreferrer"
