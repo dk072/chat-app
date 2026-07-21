@@ -243,8 +243,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!socket) return;
 
-    // 1. Receive incoming message
-    socket.on('receive_message', async (msg: Message) => {
+    // Helper to handle incoming messages for both active and background chats
+    const handleIncomingMessage = async (msg: Message) => {
       const active = activeChatRef.current;
       
       // If message belongs to active chat viewport
@@ -296,9 +296,17 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
         });
       });
+    };
+
+    // 1. Receive incoming message (when active in the room)
+    socket.on('receive_message', handleIncomingMessage);
+
+    // 2. Receive background message notification (when not active in the room)
+    socket.on('new_message_notification', (data: { conversationId: string; message: Message }) => {
+      handleIncomingMessage(data.message);
     });
 
-    // 2. Message status / edit / reaction changes
+    // 3. Message status / edit / reaction changes
     socket.on('message_updated', (msg: Message) => {
       // Update viewport list
       setMessages((prev) => prev.map((m) => (m.id === msg.id ? msg : m)));
