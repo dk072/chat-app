@@ -78,7 +78,7 @@ const MainLayout: React.FC = () => {
       <AnimatedBackground />
 
       {/* Column 1: Navigation Sidebar (Hidden on mobile if chat is active) */}
-      <div className={`w-full md:w-auto h-auto md:h-full shrink-0 ${activeChat ? 'hidden md:block' : 'block z-50'}`}>
+      <div className={`w-full md:w-auto h-auto md:h-full shrink-0 z-50 ${activeChat ? 'hidden md:block' : 'block'}`}>
         <NavigationSidebar 
           onOpenSettings={() => setShowSettings(true)} 
           activeView={activeNavView}
