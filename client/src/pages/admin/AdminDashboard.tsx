@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Users, AlertOctagon, BarChart2, Shield, LogOut, Search, Ban, CheckCircle } from 'lucide-react';
+import { Users, AlertOctagon, BarChart2, Shield, LogOut, Search, Ban, CheckCircle, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import type { User, Report, AdminStats } from '../../types';
@@ -47,6 +47,19 @@ const Dashboard: React.FC = () => {
       loadData();
     } catch (err) {
       alert('Failed to toggle ban status');
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!window.confirm('Are you sure you want to permanently delete this user? This action cannot be undone.')) {
+      return;
+    }
+    try {
+      await api.delete(`/admin/users/${userId}`);
+      setUsers(users.filter(u => u.id !== userId));
+      loadData();
+    } catch (err) {
+      alert('Failed to delete user');
     }
   };
 
@@ -152,9 +165,16 @@ const Dashboard: React.FC = () => {
                         <td className="py-4">{u.isBanned ? <span className="text-rose-500 text-sm font-medium">Banned</span> : <span className="text-emerald-500 text-sm font-medium">Active</span>}</td>
                         <td className="py-4 text-right pr-4">
                           {u.role !== 'ADMIN' && (
-                            <button onClick={() => handleBanToggle(u.id)} className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${u.isBanned ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' : 'bg-rose-50 text-rose-600 hover:bg-rose-100'} flex items-center space-x-1 ml-auto`}>
-                              <Ban className="w-3.5 h-3.5" /><span>{u.isBanned ? 'Unban' : 'Ban'}</span>
-                            </button>
+                            <div className="flex items-center justify-end space-x-2">
+                              <button onClick={() => handleBanToggle(u.id)} className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${u.isBanned ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' : 'bg-rose-50 text-rose-600 hover:bg-rose-100'} flex items-center space-x-1`}>
+                                {u.isBanned ? <CheckCircle className="w-3.5 h-3.5" /> : <Ban className="w-3.5 h-3.5" />}
+                                <span>{u.isBanned ? 'Unban' : 'Ban'}</span>
+                              </button>
+                              <button onClick={() => handleDeleteUser(u.id)} className="px-4 py-1.5 rounded-lg text-xs font-semibold transition-all bg-red-50 text-red-600 hover:bg-red-100 flex items-center space-x-1">
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Delete</span>
+                              </button>
+                            </div>
                           )}
                         </td>
                       </tr>
