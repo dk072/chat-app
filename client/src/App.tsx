@@ -87,7 +87,7 @@ const MainLayout: React.FC = () => {
       </div>
 
       {/* Column 2: Chat List (Hidden on mobile if chat is active) */}
-      <div className={`flex-1 md:flex-none md:h-full shrink-0 w-full md:w-80 lg:w-[350px] glass-panel border-r border-slate-200/20 dark:border-white/5 overflow-hidden ${activeChat ? 'hidden md:block' : 'block'}`}>
+      <div className={`flex-1 md:flex-none md:h-full shrink-0 w-full md:w-64 lg:w-80 glass-panel border-r border-slate-200/20 dark:border-white/5 overflow-hidden ${activeChat ? 'hidden md:block' : 'block'}`}>
         {activeNavView === 'chats' ? (
           <Sidebar />
         ) : (
