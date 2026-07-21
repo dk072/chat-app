@@ -128,21 +128,29 @@ const ChatWindow: React.FC = () => {
   };
 
   // Dispatch message
-  const handleSend = async () => {
+  const handleSend = () => {
     if ((!inputText.trim() && !selectedFile) || !activeChat) return;
 
+    // Capture current state values
+    const currentText = inputText;
+    const currentFileType = fileType;
+    const currentFile = selectedFile;
+
+    // Instantly clear the UI to make the app feel incredibly fast
+    setInputText('');
+    setSelectedFile(null);
+    setShowEmojiPicker(false);
+    sendTypingStatus(false);
+
+    // Fire API request asynchronously in the background
     try {
-      if (selectedFile) {
-        await sendMessage(inputText, fileType, selectedFile);
-        setSelectedFile(null);
+      if (currentFile) {
+        sendMessage(currentText, currentFileType, currentFile).catch(() => alert('Error sending message'));
       } else {
-        await sendMessage(inputText, 'TEXT');
+        sendMessage(currentText, 'TEXT').catch(() => alert('Error sending message'));
       }
-      setInputText('');
-      setShowEmojiPicker(false);
-      sendTypingStatus(false);
     } catch (err) {
-      alert('Error sending message');
+      console.error(err);
     }
   };
 
@@ -202,19 +210,19 @@ const ChatWindow: React.FC = () => {
         if (e.data.size > 0) chunks.push(e.data);
       };
 
-      recorder.onstop = async () => {
+      recorder.onstop = () => {
         const audioBlob = new Blob(chunks, { type: 'audio/webm' });
         const audioFile = new File([audioBlob], `voice_${Date.now()}.webm`, { type: 'audio/webm' });
         
         try {
           if (activeChat) {
-            await sendMessage(null, 'VOICE', audioFile);
+            sendMessage(null, 'VOICE', audioFile).catch(() => alert('Could not upload voice note'));
           }
         } catch (e) {
-          alert('Could not upload voice note');
+          console.error(e);
         }
 
-        // Clean track streams
+        // Clean track streams immediately
         stream.getTracks().forEach((track) => track.stop());
         setAudioChunks([]);
       };
