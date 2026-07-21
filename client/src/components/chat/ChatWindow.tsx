@@ -414,7 +414,7 @@ const ChatWindow: React.FC = () => {
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
-          className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/75 backdrop-blur-sm border-4 border-dashed border-brand-500 m-4 rounded-3xl transition-all duration-200"
+          className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/75 md:backdrop-blur-sm border-4 border-dashed border-brand-500 m-4 rounded-3xl transition-all duration-200"
         >
           <div className="p-6 rounded-full bg-brand-500/10 text-brand-500 mb-4 animate-bounce">
             <Paperclip className="w-12 h-12" />
@@ -425,7 +425,7 @@ const ChatWindow: React.FC = () => {
       )}
 
       {/* Header */}
-      <div className="px-4 md:px-6 py-3 border-b border-slate-200/50 dark:border-slate-700/50 bg-white/30 dark:bg-slate-950/30 backdrop-blur-md flex items-center justify-between z-20">
+      <div className="px-4 md:px-6 py-3 border-b border-slate-200/50 dark:border-slate-700/50 bg-white/90 dark:bg-slate-900/90 md:bg-white/30 md:dark:bg-slate-950/30 md:backdrop-blur-md flex items-center justify-between z-20 shrink-0 shadow-sm">
         <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
           <button 
             onClick={() => selectChat(null)}
@@ -688,7 +688,7 @@ const ChatWindow: React.FC = () => {
                       className={`p-3.5 rounded-2xl relative select-text shadow-sm transition-all hover:shadow-md ${
                         isSelf
                           ? 'bg-gradient-to-br from-brand-500 to-indigo-600 text-white rounded-tr-none bubble-tail-self shadow-brand-500/30'
-                          : 'bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm text-slate-800 dark:text-slate-100 rounded-tl-none bubble-tail-other border border-white/20 dark:border-white/5'
+                          : 'bg-white/95 dark:bg-slate-800/95 md:bg-white/80 md:dark:bg-slate-800/80 md:backdrop-blur-sm text-slate-800 dark:text-slate-100 rounded-tl-none bubble-tail-other border border-white/20 dark:border-white/5'
                       }`}
                     >
                       {/* Reply preview Quote inside bubble */}
@@ -869,7 +869,7 @@ const ChatWindow: React.FC = () => {
                     size="sm"
                     status={activeChat.partner.status}
                   />
-                  <div className="px-4 py-3 rounded-2xl rounded-bl-sm bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-white/20 dark:border-white/5 shadow-sm flex items-center space-x-1.5 h-[42px]">
+                  <div className="px-4 py-3 rounded-2xl rounded-bl-sm bg-white/95 dark:bg-slate-800/95 md:bg-white/80 md:dark:bg-slate-800/80 md:backdrop-blur-sm border border-white/20 dark:border-white/5 shadow-sm flex items-center space-x-1.5 h-[42px]">
                     <div className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>
                     <div className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce" style={{ animationDelay: '150ms' }}></div>
                     <div className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce" style={{ animationDelay: '300ms' }}></div>
@@ -932,7 +932,7 @@ const ChatWindow: React.FC = () => {
       )}
 
       {/* Input controls section */}
-      <div className="p-4 bg-white/30 dark:bg-slate-950/30 backdrop-blur-md border-t border-slate-200/50 dark:border-slate-700/50 flex items-center space-x-3 z-20">
+      <div className="p-4 bg-white/95 dark:bg-slate-900/95 md:bg-white/30 md:dark:bg-slate-950/30 md:backdrop-blur-md border-t border-slate-200/50 dark:border-slate-700/50 flex items-center space-x-3 z-20 shrink-0">
         {/* Attachment menu trigger */}
         <button
           onClick={() => fileInputRef.current?.click()}
@@ -1051,7 +1051,7 @@ const ChatWindow: React.FC = () => {
 
       {/* Abuse report modal overlay */}
       {showReportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs select-none">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 md:backdrop-blur-sm select-none">
           <div className="w-full max-w-md rounded-2xl bg-chat-panel-light dark:bg-chat-panel-dark border border-slate-700 p-6 space-y-4">
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center space-x-2">
               <AlertTriangle className="w-5 h-5 text-rose-500" />

@@ -18,7 +18,7 @@ const AnimatedBackground: React.FC = () => {
           ease: "linear",
           repeat: Infinity,
         }}
-        className="absolute -top-32 -left-32 w-96 h-96 bg-brand-500/20 dark:bg-brand-600/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] opacity-70"
+        className="hidden md:block absolute -top-32 -left-32 w-96 h-96 bg-brand-500/20 dark:bg-brand-600/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] opacity-70"
       />
       
       {/* Blob 2 */}
@@ -33,7 +33,7 @@ const AnimatedBackground: React.FC = () => {
           ease: "linear",
           repeat: Infinity,
         }}
-        className="absolute top-1/2 -right-32 w-[30rem] h-[30rem] bg-indigo-400/20 dark:bg-indigo-600/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[120px] opacity-60"
+        className="hidden md:block absolute top-1/2 -right-32 w-[30rem] h-[30rem] bg-indigo-400/20 dark:bg-indigo-600/20 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[120px] opacity-60"
       />
 
       {/* Blob 3 */}
@@ -48,7 +48,7 @@ const AnimatedBackground: React.FC = () => {
           ease: "linear",
           repeat: Infinity,
         }}
-        className="absolute -bottom-48 left-1/3 w-[25rem] h-[25rem] bg-cyan-400/20 dark:bg-cyan-600/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] opacity-50"
+        className="hidden md:block absolute -bottom-48 left-1/3 w-[25rem] h-[25rem] bg-cyan-400/20 dark:bg-cyan-600/10 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[100px] opacity-50"
       />
     </div>
   );

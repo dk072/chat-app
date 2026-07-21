@@ -93,7 +93,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
   return (
     <div className="w-full h-full flex flex-col shrink-0 bg-white/40 dark:bg-slate-900/40">
       {/* Header */}
-      <div className="px-5 py-5 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-700/50 bg-white/30 dark:bg-slate-950/30 backdrop-blur-md">
+      <div className="px-5 py-5 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-700/50 bg-white/95 dark:bg-slate-950/95 md:bg-white/30 md:dark:bg-slate-950/30 md:backdrop-blur-md">
         <h2 className="text-xl font-bold font-outfit text-slate-800 dark:text-white tracking-wide">Messages</h2>
       </div>
 
@@ -154,7 +154,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
                   transition={{ duration: 0.2 }}
                   key={result.id}
                   onClick={() => handleStartChat(result.id)}
-                  className="flex items-center space-x-3 p-3 rounded-2xl cursor-pointer hover:bg-white/60 dark:hover:bg-slate-800/50 transition-colors backdrop-blur-sm"
+                  className="flex items-center space-x-3 p-3 rounded-2xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/80 md:hover:bg-white/60 md:dark:hover:bg-slate-800/50 transition-colors md:backdrop-blur-sm"
                 >
                   <AnimatedAvatar
                     src={result.profilePicture}

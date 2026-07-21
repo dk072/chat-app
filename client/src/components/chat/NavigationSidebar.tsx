@@ -64,7 +64,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
   );
 
   return (
-    <div className="w-full md:w-[72px] h-16 md:h-full flex flex-row md:flex-col items-center justify-around md:justify-start py-0 md:py-6 px-2 md:px-0 bg-white/60 dark:bg-slate-950/60 backdrop-blur-xl border-t md:border-t-0 md:border-r border-slate-200/50 dark:border-white/5 shadow-glass-light dark:shadow-glass-dark z-20">
+    <div className="w-full md:w-[72px] h-16 md:h-full flex flex-row md:flex-col items-center justify-around md:justify-start py-0 md:py-6 px-2 md:px-0 bg-white dark:bg-slate-950 md:bg-white/60 md:dark:bg-slate-950/60 md:backdrop-blur-xl border-t md:border-t-0 md:border-r border-slate-200/50 dark:border-white/5 shadow-glass-light dark:shadow-glass-dark z-20">
       
       {/* Top section: Avatar */}
       <div className="hidden md:block mb-8">

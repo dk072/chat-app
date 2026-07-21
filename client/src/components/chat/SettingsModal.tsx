@@ -76,7 +76,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onOpenAd
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 md:bg-black/60 md:backdrop-blur-sm">
       <div className="w-full max-w-lg rounded-3xl glass-panel shadow-glass-dark overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex justify-between items-center px-6 py-4 border-b border-chat-border-light dark:border-chat-border-dark">

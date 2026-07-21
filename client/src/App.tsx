@@ -37,7 +37,7 @@ const MainLayout: React.FC = () => {
     return (
       <div className="h-[100dvh] w-full flex flex-col items-center justify-center bg-slate-950 text-white select-none relative overflow-hidden">
         <AnimatedBackground />
-        <div className="z-10 flex flex-col items-center justify-center glass-panel p-10 rounded-3xl shadow-glass-dark border border-white/5 bg-slate-900/50 backdrop-blur-xl">
+        <div className="z-10 flex flex-col items-center justify-center glass-panel p-10 rounded-3xl shadow-glass-dark border border-white/5 bg-slate-900/50 md:backdrop-blur-xl">
           <div className="text-6xl animate-bounce mb-6">💬</div>
           <h2 className="text-3xl font-outfit font-extrabold tracking-widest bg-gradient-to-r from-brand-400 to-indigo-500 bg-clip-text text-transparent animate-pulse">
             CHIME
