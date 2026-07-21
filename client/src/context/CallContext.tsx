@@ -69,6 +69,7 @@ export const CallProvider = ({ children }: { children: ReactNode }) => {
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingCandidates = useRef<RTCIceCandidate[]>([]);
 
   // Initialize Media Devices
   const getMedia = async (type: CallType): Promise<MediaStream | null> => {
@@ -136,6 +137,7 @@ export const CallProvider = ({ children }: { children: ReactNode }) => {
     setActiveCallId(null);
     setIsMuted(false);
     setIsVideoPaused(false);
+    pendingCandidates.current = [];
   };
 
   const startTimer = () => {
@@ -277,6 +279,11 @@ export const CallProvider = ({ children }: { children: ReactNode }) => {
       }
 
       await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+      
+      // Add any queued ICE candidates that arrived before the offer
+      pendingCandidates.current.forEach(c => pc.addIceCandidate(c).catch(e => console.error('Error adding queued candidate:', e)));
+      pendingCandidates.current = [];
+
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
       
@@ -286,16 +293,24 @@ export const CallProvider = ({ children }: { children: ReactNode }) => {
     socket.on('call:answer', async (data: { receiverId: string, answer: any }) => {
       if (pcRef.current) {
         await pcRef.current.setRemoteDescription(new RTCSessionDescription(data.answer));
+        
+        // Add any queued ICE candidates that arrived before the answer
+        pendingCandidates.current.forEach(c => pcRef.current?.addIceCandidate(c).catch(e => console.error('Error adding queued candidate:', e)));
+        pendingCandidates.current = [];
       }
     });
 
     socket.on('call:iceCandidate', async (data: { senderId: string, candidate: any }) => {
-      if (pcRef.current) {
+      const candidate = new RTCIceCandidate(data.candidate);
+      if (pcRef.current && pcRef.current.remoteDescription) {
         try {
-          await pcRef.current.addIceCandidate(new RTCIceCandidate(data.candidate));
+          await pcRef.current.addIceCandidate(candidate);
         } catch (e) {
           console.error('Error adding received ice candidate', e);
         }
+      } else {
+        // Queue candidate until remote description is set
+        pendingCandidates.current.push(candidate);
       }
     });
 
