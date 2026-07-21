@@ -823,7 +823,7 @@ const ChatWindow: React.FC = () => {
                         {isSelf && !m.isDeletedForEveryone && (
                           <span className="shrink-0">
                             {m.isSeen ? (
-                              <CheckCheck className="w-3.5 h-3.5 text-white dark:text-brand-400" />
+                              <CheckCheck className="w-4 h-4 text-cyan-300 drop-shadow-sm" />
                             ) : (
                               <Check className="w-3.5 h-3.5 text-white/70" />
                             )}
