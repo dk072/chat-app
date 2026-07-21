@@ -458,7 +458,7 @@ const ChatWindow: React.FC = () => {
         <div className="flex items-center space-x-2 shrink-0">
           <button 
             onClick={() => activeChat && startCall(activeChat.partner.id, 'VOICE', activeChat.id)}
-            className="p-2 rounded-full hover:bg-brand-50 hover:text-brand-500 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors hidden sm:block"
+            className="p-2 rounded-full hover:bg-brand-50 hover:text-brand-500 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
             title="Voice Call"
           >
             <Phone className="w-4 h-4" />
