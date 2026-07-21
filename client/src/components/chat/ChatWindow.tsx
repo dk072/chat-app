@@ -572,12 +572,23 @@ const ChatWindow: React.FC = () => {
 
                   {/* Message Bubble wrapper */}
                   <div className="relative max-w-[70%] space-y-1">
-                    {/* Hover menu button */}
+                    {/* Hover Actions (Reply, Delete, Reactions) */}
                     <div
-                      className={`absolute top-1 z-10 hidden group-hover:block transition-all duration-100 ${
-                        isSelf ? '-left-8' : '-right-8'
+                      className={`absolute top-1/2 -translate-y-1/2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-all z-20 ${
+                        isSelf ? 'right-[calc(100%+8px)] flex-row-reverse space-x-reverse' : 'left-[calc(100%+8px)]'
                       }`}
                     >
+                      {/* One-click delete */}
+                      {!m.isDeletedForEveryone && (
+                        <button
+                          onClick={() => deleteMessage(m.id, isSelf)}
+                          title={isSelf ? "Delete for everyone" : "Delete for me"}
+                          className="p-1 rounded-full bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-rose-500 hover:border-rose-500 hover:text-white text-slate-500 dark:text-slate-300 transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+
                       <button
                         onClick={() => setBubbleMenuId(showMenu ? null : m.id)}
                         className="p-1 rounded-full bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300"
