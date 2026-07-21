@@ -711,6 +711,9 @@ const ChatWindow: React.FC = () => {
                                   src={getFullUrl(m.fileUrl)}
                                   alt="attachment"
                                   className="object-cover w-full max-h-72 hover:scale-[1.01] transition-transform duration-200"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = 'https://placehold.co/400x300/1e293b/94a3b8?text=Media+Expired+(Ephemeral+Storage)';
+                                  }}
                                 />
                               </a>
                             </div>
