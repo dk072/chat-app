@@ -1016,6 +1016,13 @@ const ChatWindow: React.FC = () => {
                   handleSend();
                 }
               }}
+              onFocus={(e) => {
+                // Ensure the input scrolls into view on mobile keyboards
+                setTimeout(() => {
+                  e.target.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                  scrollToBottom('smooth');
+                }, 300);
+              }}
               placeholder="Write a message..."
               rows={1}
               className="block w-full py-3 px-4 rounded-2xl bg-white/60 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-700/50 focus:border-brand-500/50 focus:ring-2 focus:ring-brand-500/20 focus:outline-none text-xs transition-all resize-none max-h-32 shadow-inner"
