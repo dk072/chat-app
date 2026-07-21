@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ShieldCheck, Users, MessageSquare, AlertOctagon, X, Ban, RefreshCw, CheckCircle, BarChart2 } from 'lucide-react';
+import { ShieldCheck, Users, MessageSquare, AlertOctagon, X, Ban, RefreshCw, CheckCircle, BarChart2, Trash2 } from 'lucide-react';
 import api from '../../services/api';
 import { User, Report, AdminStats } from '../../types';
 import Avatar from '../ui/Avatar';
@@ -92,6 +92,18 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose }) => {
       fetchStats();
     } catch (err) {
       alert('Could not toggle ban status.');
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!window.confirm('Are you sure you want to permanently delete this user? All their messages and data will be removed.')) return;
+    try {
+      await api.delete(`/admin/users/${userId}`);
+      setUsersList((prev) => prev.filter((u) => u.id !== userId));
+      setReportsList((prev) => prev.filter((r) => r.reported.id !== userId && r.reporter.id !== userId));
+      fetchStats();
+    } catch (err) {
+      alert('Could not delete user.');
     }
   };
 
@@ -270,17 +282,35 @@ const Dashboard: React.FC<DashboardProps> = ({ isOpen, onClose }) => {
                           </td>
                           <td className="px-6 py-4 text-center">
                             {u.role !== 'ADMIN' && (
-                              <button
-                                onClick={() => handleBanToggle(u.id)}
-                                className={`inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl font-bold text-[10px] transition-all hover:shadow-sm ${
-                                  u.isBanned
-                                    ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/10'
-                                    : 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/10'
-                                }`}
-                              >
-                                <Ban className="w-3.5 h-3.5" />
-                                <span>{u.isBanned ? 'Revoke Ban' : 'Ban User'}</span>
-                              </button>
+                              <div className="flex items-center justify-center space-x-2">
+                                <button
+                                  onClick={() => handleBanToggle(u.id)}
+                                  className={`inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl font-bold text-[10px] transition-all hover:shadow-sm ${
+                                    u.isBanned
+                                      ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/10'
+                                      : 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/10'
+                                  }`}
+                                >
+                                  {u.isBanned ? (
+                                    <>
+                                      <CheckCircle className="w-3 h-3" />
+                                      <span>Unban</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Ban className="w-3 h-3" />
+                                      <span>Suspend</span>
+                                    </>
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteUser(u.id)}
+                                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl font-bold text-[10px] transition-all hover:shadow-sm bg-red-600/10 hover:bg-red-600/20 text-red-600 border border-red-600/10"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                  <span>Delete</span>
+                                </button>
+                              </div>
                             )}
                           </td>
                         </tr>

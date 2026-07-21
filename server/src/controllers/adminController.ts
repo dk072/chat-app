@@ -141,6 +141,43 @@ export const toggleBanUser = async (req: Request, res: Response) => {
 };
 
 /**
+ * Permanently deletes a user from the system.
+ */
+export const deleteUser = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const io = req.app.get('io') as Server;
+
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return res.status(404).json({ message: 'Target user not found.' });
+    }
+
+    if (user.role === 'ADMIN') {
+      return res.status(400).json({ message: 'Administrator accounts cannot be deleted.' });
+    }
+
+    // Force disconnect active sockets before deletion
+    const userRoom = `user_${userId}`;
+    const userSockets = await io.in(userRoom).fetchSockets();
+
+    for (const socket of userSockets) {
+      socket.emit('banned', { message: 'Your account has been permanently deleted by an administrator.' });
+      socket.disconnect(true);
+    }
+
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+
+    return res.json({ message: 'User deleted successfully.' });
+  } catch (error) {
+    console.error('Delete user admin controller error:', error);
+    return res.status(500).json({ message: 'Internal server error deleting user.' });
+  }
+};
+
+/**
  * Retrieves all reported abuse logs.
  */
 export const getReports = async (req: Request, res: Response) => {
