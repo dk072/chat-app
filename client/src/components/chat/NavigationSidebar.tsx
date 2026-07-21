@@ -42,7 +42,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
       {isActive && (
         <motion.div
           layoutId="active-nav-indicator"
-          className="absolute left-0 w-1 h-8 bg-brand-500 rounded-r-full shadow-neon-brand"
+          className="absolute bottom-0 md:bottom-auto md:left-0 w-8 md:w-1 h-1 md:h-8 bg-brand-500 rounded-t-full md:rounded-r-full md:rounded-t-none shadow-neon-brand"
         />
       )}
       <button
@@ -57,17 +57,17 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
       </button>
 
       {/* Tooltip */}
-      <div className="absolute left-14 px-2 py-1 bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+      <div className="hidden md:block absolute left-14 px-2 py-1 bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
         {label}
       </div>
     </div>
   );
 
   return (
-    <div className="w-[72px] h-full flex flex-col items-center py-6 bg-white/60 dark:bg-slate-950/60 backdrop-blur-xl border-r border-slate-200/50 dark:border-white/5 shadow-glass-light dark:shadow-glass-dark z-20">
+    <div className="w-full md:w-[72px] h-16 md:h-full flex flex-row md:flex-col items-center justify-around md:justify-start py-0 md:py-6 px-2 md:px-0 bg-white/60 dark:bg-slate-950/60 backdrop-blur-xl border-t md:border-t-0 md:border-r border-slate-200/50 dark:border-white/5 shadow-glass-light dark:shadow-glass-dark z-20">
       
       {/* Top section: Avatar */}
-      <div className="mb-8">
+      <div className="hidden md:block mb-8">
         <AnimatedAvatar 
           src={user?.profilePicture} 
           name={user?.username || ''} 
@@ -78,7 +78,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
       </div>
 
       {/* Middle section: Navigation Icons */}
-      <div className="flex-1 flex flex-col space-y-4 w-full">
+      <div className="flex-1 md:flex-none flex flex-row md:flex-col space-x-2 md:space-x-0 md:space-y-4 w-full justify-center md:justify-start">
         <NavItem 
           id="chats" 
           icon={MessageSquare} 
@@ -105,7 +105,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
       </div>
 
       {/* Bottom section: Settings & Logout */}
-      <div className="flex flex-col space-y-4 w-full mt-auto">
+      <div className="flex flex-row md:flex-col space-x-2 md:space-x-0 md:space-y-4 w-auto md:w-full mt-0 md:mt-auto">
         <NavItem 
           id="settings" 
           icon={Settings} 

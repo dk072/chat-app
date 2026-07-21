@@ -36,7 +36,7 @@ const LoginCard: React.FC<LoginCardProps> = ({ onToggle }) => {
   };
 
   return (
-    <GlassCard className="w-full max-w-md p-8" variant="auto">
+    <GlassCard className="w-full max-w-md p-6 md:p-8" variant="auto">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-outfit font-extrabold tracking-tight bg-gradient-to-r from-brand-400 to-indigo-500 bg-clip-text text-transparent">
           Welcome Back

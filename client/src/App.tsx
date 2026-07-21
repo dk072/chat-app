@@ -74,11 +74,11 @@ const MainLayout: React.FC = () => {
   }
 
   return (
-    <div className="h-[100dvh] w-full flex overflow-hidden relative text-slate-800 dark:text-slate-100 selection:bg-brand-500/30">
+    <div className="h-[100dvh] w-full flex flex-col-reverse md:flex-row overflow-hidden relative text-slate-800 dark:text-slate-100 selection:bg-brand-500/30">
       <AnimatedBackground />
 
       {/* Column 1: Navigation Sidebar (Hidden on mobile if chat is active) */}
-      <div className={`h-full shrink-0 ${activeChat ? 'hidden md:block' : 'block'}`}>
+      <div className={`w-full md:w-auto h-auto md:h-full shrink-0 ${activeChat ? 'hidden md:block' : 'block z-50'}`}>
         <NavigationSidebar 
           onOpenSettings={() => setShowSettings(true)} 
           activeView={activeNavView}
@@ -87,7 +87,7 @@ const MainLayout: React.FC = () => {
       </div>
 
       {/* Column 2: Chat List (Hidden on mobile if chat is active) */}
-      <div className={`h-full shrink-0 w-full md:w-80 glass-panel border-r border-slate-200/20 dark:border-white/5 ${activeChat ? 'hidden md:block' : 'block'}`}>
+      <div className={`flex-1 md:h-full shrink-0 w-full md:w-80 glass-panel border-r border-slate-200/20 dark:border-white/5 overflow-hidden ${activeChat ? 'hidden md:block' : 'block'}`}>
         {activeNavView === 'chats' ? (
           <Sidebar />
         ) : (
@@ -98,7 +98,7 @@ const MainLayout: React.FC = () => {
       </div>
 
       {/* Column 3: Main Chat Window */}
-      <div className={`flex-1 h-full flex-col min-w-0 relative ${activeChat ? 'flex' : 'hidden md:flex'}`}>
+      <div className={`flex-1 min-h-0 md:h-full flex-col min-w-0 relative ${activeChat ? 'flex' : 'hidden md:flex'}`}>
         <ChatWindow />
       </div>
 
