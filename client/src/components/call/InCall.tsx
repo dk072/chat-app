@@ -19,7 +19,7 @@ const InCall: React.FC = () => {
   const { conversations } = useChat();
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteMediaRef = useRef<HTMLVideoElement & HTMLAudioElement>(null);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
@@ -33,10 +33,10 @@ const InCall: React.FC = () => {
   }, [localStream]);
 
   useEffect(() => {
-    if (remoteVideoRef.current && remoteStream) {
-      remoteVideoRef.current.srcObject = remoteStream;
+    if (remoteMediaRef.current && remoteStream) {
+      remoteMediaRef.current.srcObject = remoteStream;
     }
-  }, [remoteStream]);
+  }, [remoteStream, callType]);
 
   // Auto-hide controls in full screen
   useEffect(() => {
@@ -70,7 +70,7 @@ const InCall: React.FC = () => {
       <div className="w-full h-full relative flex items-center justify-center bg-slate-900">
         {callType === 'VIDEO' && remoteStream ? (
           <video 
-            ref={remoteVideoRef} 
+            ref={remoteMediaRef} 
             autoPlay 
             playsInline 
             className="w-full h-full object-cover" 
@@ -80,6 +80,10 @@ const InCall: React.FC = () => {
             <Avatar src={partner.profilePicture} name={partner.username} size={isFullscreen ? 'lg' : 'md'} />
             {isFullscreen && <h2 className="text-white text-2xl font-semibold">{partner.username}</h2>}
             <div className="text-brand-400 font-mono text-xl">{formatDuration(duration)}</div>
+            {/* Hidden audio element for voice calls */}
+            {remoteStream && (
+              <audio ref={remoteMediaRef} autoPlay playsInline className="hidden" />
+            )}
           </div>
         )}
       </div>
