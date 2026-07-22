@@ -32,6 +32,7 @@ const ChatWindow: React.FC = () => {
     selectChat,
     editMessage,
     deleteMessage,
+    clearChatHistory,
     reactToMessage,
     togglePinChat,
     replyingTo,
@@ -491,8 +492,22 @@ const ChatWindow: React.FC = () => {
             className={`p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors ${
               activeChat.isPinned ? 'text-brand-500 rotate-45' : 'text-slate-500 dark:text-slate-400'
             }`}
+            title={activeChat.isPinned ? "Unpin chat" : "Pin chat"}
           >
             <Pin className="w-4 h-4" />
+          </button>
+
+          {/* Clear Chat History Trigger */}
+          <button
+            onClick={() => {
+              if (window.confirm('Are you sure you want to clear chat history? All messages in this conversation will be removed from your view.')) {
+                clearChatHistory(activeChat.id);
+              }
+            }}
+            className="p-2 rounded-full hover:bg-rose-500/10 text-rose-500 transition-colors"
+            title="Clear chat history"
+          >
+            <Trash2 className="w-4 h-4" />
           </button>
 
           {/* Abuse Report Trigger */}
@@ -586,16 +601,20 @@ const ChatWindow: React.FC = () => {
                         isSelf ? 'right-[calc(100%+8px)] flex-row-reverse space-x-reverse' : 'left-[calc(100%+8px)]'
                       }`}
                     >
-                      {/* One-click delete */}
-                      {!m.isDeletedForEveryone && (
-                        <button
-                          onClick={() => deleteMessage(m.id, isSelf)}
-                          title={isSelf ? "Delete for everyone" : "Delete for me"}
-                          className="p-1 rounded-full bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-rose-500 hover:border-rose-500 hover:text-white text-slate-500 dark:text-slate-300 transition-colors"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
+                      {/* One-click delete button (Always available for all messages including deleted placeholders) */}
+                      <button
+                        onClick={() => {
+                          if (isSelf && !m.isDeletedForEveryone) {
+                            setBubbleMenuId(showMenu ? null : m.id);
+                          } else {
+                            deleteMessage(m.id, false);
+                          }
+                        }}
+                        title={isSelf && !m.isDeletedForEveryone ? "Delete options" : "Delete message"}
+                        className="p-1 rounded-full bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-rose-500 hover:border-rose-500 hover:text-white text-slate-500 dark:text-slate-300 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
 
                       <button
                         onClick={() => setBubbleMenuId(showMenu ? null : m.id)}
@@ -612,32 +631,36 @@ const ChatWindow: React.FC = () => {
                           }`}
                         >
                           {/* Emoji reactions */}
-                          <div className="flex space-x-1 justify-between p-1 bg-slate-800 rounded-lg mb-1">
-                            {defaultEmojis.slice(0, 5).map((e) => (
-                              <button
-                                key={e}
-                                onClick={() => {
-                                  reactToMessage(m.id, e);
-                                  setBubbleMenuId(null);
-                                }}
-                                className="hover:scale-125 transition-transform text-xs"
-                              >
-                                {e}
-                              </button>
-                            ))}
-                          </div>
+                          {!m.isDeletedForEveryone && (
+                            <div className="flex space-x-1 justify-between p-1 bg-slate-800 rounded-lg mb-1">
+                              {defaultEmojis.slice(0, 5).map((e) => (
+                                <button
+                                  key={e}
+                                  onClick={() => {
+                                    reactToMessage(m.id, e);
+                                    setBubbleMenuId(null);
+                                  }}
+                                  className="hover:scale-125 transition-transform text-xs"
+                                >
+                                  {e}
+                                </button>
+                              ))}
+                            </div>
+                          )}
 
                           {/* Reply */}
-                          <button
-                            onClick={() => {
-                              setReplyingTo(m);
-                              setBubbleMenuId(null);
-                            }}
-                            className="w-full flex items-center space-x-2 p-1.5 rounded-lg text-[10px] font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                          >
-                            <CornerUpLeft className="w-3.5 h-3.5" />
-                            <span>Reply</span>
-                          </button>
+                          {!m.isDeletedForEveryone && (
+                            <button
+                              onClick={() => {
+                                setReplyingTo(m);
+                                setBubbleMenuId(null);
+                              }}
+                              className="w-full flex items-center space-x-2 p-1.5 rounded-lg text-[10px] font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                            >
+                              <CornerUpLeft className="w-3.5 h-3.5" />
+                              <span>Reply</span>
+                            </button>
+                          )}
 
                           {/* Edit (Text only, self only) */}
                           {isSelf && m.type === 'TEXT' && !m.isDeletedForEveryone && (
@@ -670,8 +693,10 @@ const ChatWindow: React.FC = () => {
                           {isSelf && !m.isDeletedForEveryone && (
                             <button
                               onClick={() => {
-                                deleteMessage(m.id, true);
-                                setBubbleMenuId(null);
+                                if (window.confirm('Delete this message for everyone?')) {
+                                  deleteMessage(m.id, true);
+                                  setBubbleMenuId(null);
+                                }
                               }}
                               className="w-full flex items-center space-x-2 p-1.5 rounded-lg text-[10px] font-semibold text-rose-500 hover:bg-rose-500/15 transition-colors"
                             >

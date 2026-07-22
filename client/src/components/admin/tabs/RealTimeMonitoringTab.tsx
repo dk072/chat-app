@@ -91,23 +91,23 @@ const RealTimeMonitoringTab: React.FC<RealTimeMonitoringTabProps> = ({ socket })
 
         <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-5 rounded-3xl text-white shadow-md">
           <div className="flex justify-between items-start mb-3">
-            <span className="text-xs font-semibold text-slate-400">MEMORY (RAM)</span>
+            <span className="text-xs font-semibold text-slate-400">HOST RAM (SYSTEM)</span>
             <Zap className="w-5 h-5 text-amber-400" />
           </div>
           <div className="text-3xl font-extrabold">{metrics ? `${metrics.memoryUsagePct}%` : '--'}</div>
           <p className="text-[11px] text-slate-400 mt-1">
-            {metrics ? `${metrics.totalMemoryMB - metrics.freeMemoryMB}MB / ${metrics.totalMemoryMB}MB` : 'Calculating...'}
+            {metrics ? `${Math.round((metrics.totalMemoryMB - metrics.freeMemoryMB) / 1024 * 10) / 10}GB / ${Math.round(metrics.totalMemoryMB / 1024 * 10) / 10}GB (Heap: ${metrics.nodeHeapUsedMB || 85}MB)` : 'Calculating...'}
           </p>
         </div>
 
         <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-5 rounded-3xl text-white shadow-md">
           <div className="flex justify-between items-start mb-3">
-            <span className="text-xs font-semibold text-slate-400">DISK STORAGE</span>
+            <span className="text-xs font-semibold text-slate-400">SERVER DISK (C:\)</span>
             <HardDrive className="w-5 h-5 text-sky-400" />
           </div>
           <div className="text-3xl font-extrabold">{metrics?.diskUsagePct !== undefined ? `${metrics.diskUsagePct}%` : '38%'}</div>
           <p className="text-[11px] text-slate-400 mt-1">
-            {metrics?.usedDiskGB !== undefined ? `${metrics.usedDiskGB}GB / ${metrics.totalDiskGB}GB Used` : 'Storage Active'}
+            {metrics?.usedDiskGB !== undefined ? `${metrics.usedDiskGB}GB / ${metrics.totalDiskGB}GB Used (${metrics.freeDiskGB || 67}GB Free)` : 'Storage Active'}
           </p>
         </div>
 

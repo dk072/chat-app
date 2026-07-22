@@ -19,6 +19,7 @@ interface ChatContextType {
   sendMessage: (content: string | null, type: MessageType, file?: File) => Promise<void>;
   editMessage: (messageId: string, content: string) => Promise<void>;
   deleteMessage: (messageId: string, deleteForEveryone: boolean) => Promise<void>;
+  clearChatHistory: (conversationId: string) => Promise<void>;
   reactToMessage: (messageId: string, emoji: string | null) => Promise<void>;
   togglePinChat: (conversationId: string) => Promise<void>;
   setReplyingTo: (msg: Message | null) => void;
@@ -200,6 +201,17 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (err) {
       console.error('Failed to delete message:', err);
+    }
+  };
+
+  const clearChatHistory = async (conversationId: string) => {
+    try {
+      await api.delete(`/messages/conversations/${conversationId}`);
+      if (activeChatRef.current && activeChatRef.current.id === conversationId) {
+        setMessages([]);
+      }
+    } catch (err) {
+      console.error('Failed to clear chat history:', err);
     }
   };
 
@@ -403,6 +415,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         sendMessage,
         editMessage,
         deleteMessage,
+        clearChatHistory,
         reactToMessage,
         togglePinChat,
         setReplyingTo,

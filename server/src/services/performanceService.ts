@@ -7,6 +7,8 @@ export interface PerformanceMetrics {
   freeMemoryMB: number;
   totalMemoryMB: number;
   memoryUsagePct: number;
+  nodeHeapUsedMB: number;
+  nodeRssMB: number;
   totalDiskGB: number;
   freeDiskGB: number;
   usedDiskGB: number;
@@ -34,6 +36,11 @@ export const getPerformanceMetrics = async (activeCallsCount = 0, onlineUsersCou
   const freeMem = os.freemem() / (1024 * 1024);
   const totalMem = os.totalmem() / (1024 * 1024);
   const memPct = Math.round(((totalMem - freeMem) / totalMem) * 100);
+
+  // Process memory usage
+  const memUsage = process.memoryUsage();
+  const nodeHeapUsedMB = Math.round(memUsage.heapUsed / (1024 * 1024));
+  const nodeRssMB = Math.round(memUsage.rss / (1024 * 1024));
 
   // Disk storage computation
   let totalDiskGB = 512;
@@ -80,6 +87,8 @@ export const getPerformanceMetrics = async (activeCallsCount = 0, onlineUsersCou
     freeMemoryMB: Math.round(freeMem),
     totalMemoryMB: Math.round(totalMem),
     memoryUsagePct: memPct,
+    nodeHeapUsedMB,
+    nodeRssMB,
     totalDiskGB,
     freeDiskGB,
     usedDiskGB,

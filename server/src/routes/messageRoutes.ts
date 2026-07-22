@@ -9,6 +9,7 @@ import {
   reactToMessage,
   markAsSeen,
   togglePinConversation,
+  deleteConversation,
 } from '../controllers/messageController';
 import { protect } from '../middlewares/authMiddleware';
 import { upload, validateUpload } from '../middlewares/uploadMiddleware';
@@ -24,6 +25,8 @@ router.get('/conversations', getConversations);
 router.post('/conversations', createConversation);
 router.post('/conversations/:conversationId/seen', markAsSeen);
 router.post('/conversations/:conversationId/pin', togglePinConversation);
+router.delete('/conversations/:conversationId', deleteConversation);
+
 
 // Message listings & dispatch
 router.get('/:conversationId', getMessages);

@@ -3,6 +3,8 @@ export interface TelemetryMetrics {
   freeMemoryMB: number;
   totalMemoryMB: number;
   memoryUsagePct: number;
+  nodeHeapUsedMB?: number;
+  nodeRssMB?: number;
   totalDiskGB?: number;
   freeDiskGB?: number;
   usedDiskGB?: number;

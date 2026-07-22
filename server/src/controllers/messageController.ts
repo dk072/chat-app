@@ -573,3 +573,51 @@ export const togglePinConversation = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'Internal server error toggling chat pin.' });
   }
 };
+
+/**
+ * Clears message history in a conversation for the requesting user ("Delete Chat / Clear History").
+ */
+export const deleteConversation = async (req: Request, res: Response) => {
+  const authReq = req as AuthenticatedRequest;
+  const userId = authReq.user!.id;
+  const { conversationId } = req.params;
+
+  try {
+    const conversation = await prisma.conversation.findUnique({
+      where: { id: conversationId },
+    });
+
+    if (!conversation) {
+      return res.status(404).json({ message: 'Conversation not found.' });
+    }
+
+    if (conversation.user1Id !== userId && conversation.user2Id !== userId) {
+      return res.status(403).json({ message: 'Unauthorized.' });
+    }
+
+    const messages = await prisma.message.findMany({
+      where: { conversationId },
+    });
+
+    const formattedUserId = `,${userId},`;
+
+    await Promise.all(
+      messages.map((m) => {
+        if (!m.deletedForUsers.includes(formattedUserId)) {
+          const updatedDeletedForUsers = m.deletedForUsers === '' ? formattedUserId : m.deletedForUsers + `${userId},`;
+          return prisma.message.update({
+            where: { id: m.id },
+            data: { deletedForUsers: updatedDeletedForUsers },
+          });
+        }
+        return Promise.resolve();
+      })
+    );
+
+    return res.json({ message: 'Chat history cleared successfully.' });
+  } catch (error) {
+    console.error('Error clearing conversation:', error);
+    return res.status(500).json({ message: 'Internal server error clearing chat history.' });
+  }
+};
+
