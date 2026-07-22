@@ -108,6 +108,8 @@ if (!fs.existsSync(uploadsDir)) {
 // Host the uploads folder statically
 app.use('/uploads', express.static(uploadsDir));
 
+import nextGenRoutes from './routes/nextGenRoutes';
+
 // Route definitions
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -115,6 +117,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/advanced', advancedAdminRoutes);
 app.use('/api/calls', callRoutes);
+app.use('/api/nextgen', nextGenRoutes);
 
 
 // Health check endpoint

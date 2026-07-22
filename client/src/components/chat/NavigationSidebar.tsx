@@ -1,17 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { MessageSquare, Phone, Settings, LogOut, LayoutDashboard } from 'lucide-react';
+import { MessageSquare, Phone, Settings, LogOut, LayoutDashboard, Star, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import AnimatedAvatar from '../ui/AnimatedAvatar';
 
 interface NavigationSidebarProps {
   onOpenSettings: () => void;
+  onOpenStarred: () => void;
+  onLockApp: () => void;
   activeView: 'chats' | 'calls' | 'admin';
   setActiveView: (view: 'chats' | 'calls' | 'admin') => void;
 }
 
 const NavigationSidebar: React.FC<NavigationSidebarProps> = ({ 
   onOpenSettings, 
+  onOpenStarred,
+  onLockApp,
   activeView, 
   setActiveView 
 }) => {
@@ -93,6 +97,12 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
           isActive={activeView === 'calls'} 
           onClick={() => setActiveView('calls')} 
         />
+        <NavItem 
+          id="starred" 
+          icon={Star} 
+          label="Starred Messages" 
+          onClick={onOpenStarred} 
+        />
         {user?.role === 'ADMIN' && (
           <NavItem 
             id="admin" 
@@ -106,6 +116,12 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
 
       {/* Bottom section: Settings & Logout */}
       <div className="flex flex-row md:flex-col space-x-2 md:space-x-0 md:space-y-4 w-auto md:w-full mt-0 md:mt-auto">
+        <NavItem 
+          id="lock" 
+          icon={Lock} 
+          label="Lock App" 
+          onClick={onLockApp} 
+        />
         <NavItem 
           id="settings" 
           icon={Settings} 

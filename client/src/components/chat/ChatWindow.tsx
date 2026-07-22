@@ -5,13 +5,15 @@ import { useCall } from '../../context/CallContext';
 import {
   Send, Paperclip, Smile, Mic, X, MoreVertical, CornerUpLeft, Edit3, Trash2, 
   ChevronDown, Download, AlertTriangle, Search, Info, Pin, Play, Pause, Square, ArrowLeft,
-  Check, CheckCheck, MessageSquare, Phone, Video
+  Check, CheckCheck, MessageSquare, Phone, Video, Sparkles, BarChart2, Star
 } from 'lucide-react';
 import AnimatedAvatar from '../ui/AnimatedAvatar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessagesSkeleton } from '../ui/Skeleton';
 import api from '../../services/api';
 import { Message, MessageType } from '../../types';
+import AIAssistantModal from './AIAssistantModal';
+import { InChatPollModal } from './InChatPollModal';
 
 const getFullUrl = (url?: string | null) => {
   if (!url) return '';
@@ -68,6 +70,10 @@ const ChatWindow: React.FC = () => {
 
   // Active bubble menu tracking
   const [bubbleMenuId, setBubbleMenuId] = useState<string | null>(null);
+
+  // Next-Gen Feature Modals
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [showPollModal, setShowPollModal] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatViewportRef = useRef<HTMLDivElement>(null);
@@ -966,6 +972,24 @@ const ChatWindow: React.FC = () => {
         >
           <Paperclip className="w-5 h-5" />
         </button>
+
+        {/* AI Assistant button */}
+        <button
+          onClick={() => setShowAIModal(true)}
+          className="p-2.5 rounded-full hover:bg-indigo-500/10 text-indigo-500 transition-colors shrink-0"
+          title="AI Writing Assistant & Translator"
+        >
+          <Sparkles className="w-5 h-5" />
+        </button>
+
+        {/* In-Chat Poll button */}
+        <button
+          onClick={() => setShowPollModal(true)}
+          className="p-2.5 rounded-full hover:bg-indigo-500/10 text-indigo-400 transition-colors shrink-0"
+          title="Create In-Chat Poll"
+        >
+          <BarChart2 className="w-5 h-5" />
+        </button>
         <input
           type="file"
           ref={fileInputRef}
@@ -1113,6 +1137,22 @@ const ChatWindow: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* AI Assistant Modal */}
+      <AIAssistantModal
+        isOpen={showAIModal}
+        onClose={() => setShowAIModal(false)}
+        inputText={inputText}
+        onApplyText={(newText) => setInputText(newText)}
+        conversationId={activeChat.id}
+      />
+
+      {/* In-Chat Poll Modal */}
+      <InChatPollModal
+        isOpen={showPollModal}
+        onClose={() => setShowPollModal(false)}
+        conversationId={activeChat.id}
+      />
     </div>
   );
 };

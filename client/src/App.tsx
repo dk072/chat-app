@@ -16,10 +16,15 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AnimatedBackground from './components/ui/AnimatedBackground';
 import PageTransition from './components/ui/PageTransition';
 
+import { StarredMessagesDrawer } from './components/chat/StarredMessagesDrawer';
+import { AppLockModal } from './components/chat/AppLockModal';
+
 const MainLayout: React.FC = () => {
   const { user, loading } = useAuth();
   const { activeChat } = useChat();
   const [showSettings, setShowSettings] = useState(false);
+  const [showStarred, setShowStarred] = useState(false);
+  const [isAppLocked, setIsAppLocked] = useState(false);
   const [isLoginView, setIsLoginView] = useState(true);
   const [activeNavView, setActiveNavView] = useState<'chats' | 'calls' | 'admin'>('chats');
   const [loadingText, setLoadingText] = useState('Connecting to secure server...');
@@ -81,6 +86,8 @@ const MainLayout: React.FC = () => {
       <div className={`w-full md:w-auto h-auto md:h-full shrink-0 z-50 ${activeChat ? 'hidden md:block' : 'block'}`}>
         <NavigationSidebar 
           onOpenSettings={() => setShowSettings(true)} 
+          onOpenStarred={() => setShowStarred(true)}
+          onLockApp={() => setIsAppLocked(true)}
           activeView={activeNavView}
           setActiveView={setActiveNavView}
         />
@@ -106,6 +113,16 @@ const MainLayout: React.FC = () => {
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
         onOpenAdmin={() => window.location.href = '/admin'}
+      />
+
+      <StarredMessagesDrawer
+        isOpen={showStarred}
+        onClose={() => setShowStarred(false)}
+      />
+
+      <AppLockModal
+        isLocked={isAppLocked}
+        onUnlock={() => setIsAppLocked(false)}
       />
 
       <CallOverlay />

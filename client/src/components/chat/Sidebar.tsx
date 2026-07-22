@@ -7,6 +7,7 @@ import { SidebarSkeleton } from '../ui/Skeleton';
 import api from '../../services/api';
 import { Conversation, User } from '../../types';
 import AnimatedAvatar from '../ui/AnimatedAvatar';
+import { StoriesBar } from './StoriesBar';
 
 interface SidebarProps {
   // Add props if needed in the future
@@ -96,6 +97,9 @@ const Sidebar: React.FC<SidebarProps> = () => {
       <div className="px-5 py-5 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-700/50 bg-white/95 dark:bg-slate-950/95 md:bg-white/30 md:dark:bg-slate-950/30 md:backdrop-blur-md">
         <h2 className="text-xl font-bold font-outfit text-slate-800 dark:text-white tracking-wide">Messages</h2>
       </div>
+
+      {/* Stories / Status Bar */}
+      <StoriesBar />
 
       {/* Search Input Area */}
       <div className="p-4 space-y-2 border-b border-slate-200/50 dark:border-slate-700/50">
