@@ -371,7 +371,7 @@ const Dashboard: React.FC = () => {
 
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-x-hidden p-8 flex flex-col space-y-6">
+      <main className="flex-1 h-screen overflow-y-auto overflow-x-hidden p-8 flex flex-col space-y-6 custom-admin-content-scroll">
         {/* Top Navbar */}
         <header className="flex justify-between items-center bg-white p-4 rounded-3xl border border-slate-100 shadow-xs">
           <button
