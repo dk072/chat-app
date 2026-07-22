@@ -152,11 +152,11 @@ const Dashboard: React.FC = () => {
   };
 
   const renderNavItems = () => (
-    <div className="flex-1 px-3 space-y-1 overflow-y-auto min-h-0 text-xs font-medium scrollbar-thin">
+    <div className="flex-1 px-3 space-y-1 overflow-y-auto min-h-0 text-xs font-medium custom-admin-sidebar-scroll pr-2">
       <div className="px-3 py-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Core Management</div>
       <button
         onClick={() => { setActiveTab('users'); setIsMobileSidebarOpen(false); }}
-        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+        className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all ${
           activeTab === 'users' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
         }`}
       >
@@ -165,7 +165,7 @@ const Dashboard: React.FC = () => {
       </button>
       <button
         onClick={() => { setActiveTab('reports'); setIsMobileSidebarOpen(false); }}
-        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+        className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all ${
           activeTab === 'reports' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
         }`}
       >
@@ -174,7 +174,7 @@ const Dashboard: React.FC = () => {
       </button>
       <button
         onClick={() => { setActiveTab('analytics'); setIsMobileSidebarOpen(false); }}
-        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+        className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all ${
           activeTab === 'analytics' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
         }`}
       >
@@ -186,7 +186,7 @@ const Dashboard: React.FC = () => {
 
       <button
         onClick={() => { setActiveTab('realtime'); setIsMobileSidebarOpen(false); }}
-        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+        className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all ${
           activeTab === 'realtime' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
         }`}
       >
@@ -196,7 +196,7 @@ const Dashboard: React.FC = () => {
 
       <button
         onClick={() => { setActiveTab('moderation'); setIsMobileSidebarOpen(false); }}
-        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+        className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all ${
           activeTab === 'moderation' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
         }`}
       >
@@ -206,7 +206,7 @@ const Dashboard: React.FC = () => {
 
       <button
         onClick={() => { setActiveTab('intelligence'); setIsMobileSidebarOpen(false); }}
-        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+        className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all ${
           activeTab === 'intelligence' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
         }`}
       >
@@ -216,7 +216,7 @@ const Dashboard: React.FC = () => {
 
       <button
         onClick={() => { setActiveTab('investigation'); setIsMobileSidebarOpen(false); }}
-        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+        className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all ${
           activeTab === 'investigation' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
         }`}
       >
@@ -226,7 +226,7 @@ const Dashboard: React.FC = () => {
 
       <button
         onClick={() => { setActiveTab('security'); setIsMobileSidebarOpen(false); }}
-        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+        className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all ${
           activeTab === 'security' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
         }`}
       >
@@ -236,7 +236,7 @@ const Dashboard: React.FC = () => {
 
       <button
         onClick={() => { setActiveTab('fileprotection'); setIsMobileSidebarOpen(false); }}
-        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+        className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all ${
           activeTab === 'fileprotection' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
         }`}
       >
@@ -246,7 +246,7 @@ const Dashboard: React.FC = () => {
 
       <button
         onClick={() => { setActiveTab('performance'); setIsMobileSidebarOpen(false); }}
-        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+        className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all ${
           activeTab === 'performance' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
         }`}
       >
@@ -256,7 +256,7 @@ const Dashboard: React.FC = () => {
 
       <button
         onClick={() => { setActiveTab('devtools'); setIsMobileSidebarOpen(false); }}
-        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+        className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all ${
           activeTab === 'devtools' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
         }`}
       >
@@ -266,7 +266,7 @@ const Dashboard: React.FC = () => {
 
       <button
         onClick={() => { setActiveTab('notifications'); setIsMobileSidebarOpen(false); }}
-        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+        className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl transition-all ${
           activeTab === 'notifications' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
         }`}
       >
@@ -275,6 +275,7 @@ const Dashboard: React.FC = () => {
       </button>
     </div>
   );
+
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">

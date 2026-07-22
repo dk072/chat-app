@@ -58,9 +58,8 @@ const DeveloperToolsTab: React.FC = () => {
           <span>System Maintenance Mode</span>
           <button
             onClick={() => setMaintenanceMode(!maintenanceMode)}
-            className={`px-3 py-1 rounded-xl text-xs font-bold text-white transition-all ${
-              maintenanceMode ? 'bg-rose-600' : 'bg-slate-400'
-            }`}
+            className={`px-3 py-1 rounded-xl text-xs font-bold text-white transition-all ${maintenanceMode ? 'bg-rose-600' : 'bg-slate-400'
+              }`}
           >
             {maintenanceMode ? 'ACTIVE' : 'OFF'}
           </button>
@@ -108,9 +107,8 @@ const DeveloperToolsTab: React.FC = () => {
                 </div>
                 <button
                   onClick={() => handleToggleFlag(flag.key, flag.isEnabled)}
-                  className={`px-3.5 py-1.5 font-bold rounded-xl transition-all ${
-                    flag.isEnabled ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'
-                  }`}
+                  className={`px-3.5 py-1.5 font-bold rounded-xl transition-all ${flag.isEnabled ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'
+                    }`}
                 >
                   {flag.isEnabled ? 'ENABLED' : 'DISABLED'}
                 </button>
