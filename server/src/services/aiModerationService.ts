@@ -6,11 +6,35 @@ const ABUSIVE_KEYWORDS = ['idiot', 'stupid', 'scammer', 'fraud', 'jerk', 'trash'
 const HATE_SPEECH_KEYWORDS = ['hate', 'die', 'kill', 'threat', 'racist', 'slur'];
 const DISPOSABLE_DOMAINS = ['mailinator.com', '10minutemail.com', 'tempmail.com', 'guerrillamail.com', 'yopmail.com'];
 
+const LLM_PHRASES = [
+  'as an ai',
+  'language model',
+  'in conclusion',
+  'furthermore',
+  'it is important to note',
+  'moreover',
+  'additionally',
+  'let me break this down',
+  'here are the key',
+  'to summarize',
+  'in summary',
+  'certainly!',
+  'delve into',
+  'testament to',
+  'pivotal role',
+];
+
 export interface ModerationAnalysisResult {
   riskScore: number;
   flags: string[];
   actionTaken?: 'WARNING' | 'MUTE' | 'BAN' | 'NONE';
   recommendation: string;
+  aiDetection?: {
+    isAiGenerated: boolean;
+    aiProbabilityScore: number;
+    confidenceLabel: 'HUMAN' | 'MIXED' | 'LIKELY_AI' | 'DEFINITELY_AI';
+    aiIndicators: string[];
+  };
   details: {
     isSpam: boolean;
     isPhishing: boolean;
@@ -34,6 +58,46 @@ export const analyzeTextContent = (text: string): ModerationAnalysisResult => {
   
   // Bot pattern: repeated capital words, suspicious repetition
   const isBot = /([A-Z]{4,}\s+){3,}/.test(text) || (text.length > 50 && new Set(text.split(' ')).size < text.split(' ').length * 0.3);
+
+  // AI Text Generation Analysis
+  const aiIndicators: string[] = [];
+  let aiScore = 0;
+
+  const matchedLlmPhrases = LLM_PHRASES.filter((phrase) => lowerText.includes(phrase));
+  if (matchedLlmPhrases.length > 0) {
+    aiIndicators.push(`LLM_PHRASES_MATCHED (${matchedLlmPhrases.join(', ')})`);
+    aiScore += matchedLlmPhrases.length * 35;
+  }
+
+  // Formal structure & markdown list signatures
+  if (/(\*\*|\#\#|\d+\.\s\*\*)/.test(text)) {
+    aiIndicators.push('MARKDOWN_STRUCTURED_FORMATTING');
+    aiScore += 20;
+  }
+
+  // Uniform sentence length & vocabulary burstiness metric
+  const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+  if (sentences.length >= 3) {
+    const avgWordsPerSentence = text.split(/\s+/).length / sentences.length;
+    if (avgWordsPerSentence >= 14 && avgWordsPerSentence <= 25) {
+      aiIndicators.push('UNIFORM_BURSTINESS');
+      aiScore += 15;
+    }
+  }
+
+  const aiProbabilityScore = Math.min(99, Math.max(5, aiScore));
+  const isAiGenerated = aiProbabilityScore >= 50;
+
+  let confidenceLabel: 'HUMAN' | 'MIXED' | 'LIKELY_AI' | 'DEFINITELY_AI' = 'HUMAN';
+  if (aiProbabilityScore >= 80) {
+    confidenceLabel = 'DEFINITELY_AI';
+    flags.push('AI_GENERATED_TEXT_CONFIRMED');
+  } else if (aiProbabilityScore >= 50) {
+    confidenceLabel = 'LIKELY_AI';
+    flags.push('SUSPECTED_AI_TEXT');
+  } else if (aiProbabilityScore >= 25) {
+    confidenceLabel = 'MIXED';
+  }
 
   if (isSpam) {
     flags.push('SPAM_DETECTED');
@@ -70,6 +134,8 @@ export const analyzeTextContent = (text: string): ModerationAnalysisResult => {
   } else if (riskScore >= 20) {
     actionTaken = 'WARNING';
     recommendation = 'Minor Risk: Issue automated content policy warning.';
+  } else if (isAiGenerated) {
+    recommendation = 'AI Generated Text Detected: Verify whether automated bot accounts are running without authorization.';
   }
 
   return {
@@ -77,6 +143,12 @@ export const analyzeTextContent = (text: string): ModerationAnalysisResult => {
     flags,
     actionTaken,
     recommendation,
+    aiDetection: {
+      isAiGenerated,
+      aiProbabilityScore,
+      confidenceLabel,
+      aiIndicators,
+    },
     details: {
       isSpam,
       isPhishing,

@@ -54,23 +54,63 @@ const SmartModerationTab: React.FC = () => {
         {/* Results Card */}
         {analysisResult && (
           <div className="mt-6 p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">AI Risk Score</span>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-bold ${
-                  analysisResult.riskScore >= 60
-                    ? 'bg-rose-100 text-rose-700'
-                    : analysisResult.riskScore >= 25
-                    ? 'bg-amber-100 text-amber-700'
-                    : 'bg-emerald-100 text-emerald-700'
-                }`}
-              >
-                {analysisResult.riskScore} / 100
-              </span>
+            {/* Top Scores Bar */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 bg-white rounded-2xl border border-slate-100 shadow-xs flex justify-between items-center">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">AI Generated Text Risk</span>
+                  <div className="text-2xl font-extrabold text-indigo-600">
+                    {analysisResult.aiDetection?.aiProbabilityScore || 5}%
+                  </div>
+                  <span className="text-[10px] font-bold text-indigo-500 uppercase">
+                    {analysisResult.aiDetection?.confidenceLabel || 'HUMAN'}
+                  </span>
+                </div>
+                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs">
+                  AI
+                </div>
+              </div>
+
+              <div className="p-4 bg-white rounded-2xl border border-slate-100 shadow-xs flex justify-between items-center">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Policy Violation Threat</span>
+                  <div className="text-2xl font-extrabold text-slate-800">
+                    {analysisResult.riskScore} / 100
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase">
+                    Action: {analysisResult.actionTaken || 'NONE'}
+                  </span>
+                </div>
+                <div
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-xs ${
+                    analysisResult.riskScore >= 60
+                      ? 'bg-rose-100 text-rose-700'
+                      : analysisResult.riskScore >= 25
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'bg-emerald-100 text-emerald-700'
+                  }`}
+                >
+                  {analysisResult.riskScore >= 60 ? 'HIGH' : analysisResult.riskScore >= 25 ? 'MED' : 'LOW'}
+                </div>
+              </div>
             </div>
 
+            {/* AI Indicators */}
+            {analysisResult.aiDetection?.aiIndicators && analysisResult.aiDetection.aiIndicators.length > 0 && (
+              <div className="p-3 bg-indigo-50/60 border border-indigo-100 rounded-xl text-xs space-y-1">
+                <span className="font-bold text-indigo-800 block">Detected AI Text Signatures:</span>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {analysisResult.aiDetection.aiIndicators.map((ind: string, idx: number) => (
+                    <span key={idx} className="px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-md font-mono text-[10px]">
+                      {ind}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div>
-              <p className="text-xs font-bold text-slate-700 mb-2">Detected Threat Flags:</p>
+              <p className="text-xs font-bold text-slate-700 mb-2">Detected Policy Flags:</p>
               <div className="flex flex-wrap gap-2">
                 {analysisResult.flags.length === 0 ? (
                   <span className="text-xs text-emerald-600 font-semibold flex items-center space-x-1">
