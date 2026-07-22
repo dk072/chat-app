@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { Plus, X, Eye, Sparkles } from 'lucide-react';
 import api from '../../services/api';
 import AnimatedAvatar from '../ui/AnimatedAvatar';
@@ -99,16 +100,16 @@ export const StoriesBar: React.FC = () => {
         ))}
       </div>
 
-      {/* Post Story Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm overflow-hidden text-white p-6 space-y-4">
+      {/* Post Story Modal (Portaled to document.body) */}
+      {showCreateModal && ReactDOM.createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fade-in">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm overflow-hidden text-white p-6 space-y-4 shadow-2xl">
             <div className="flex justify-between items-center">
               <h3 className="font-bold text-sm flex items-center space-x-1.5">
                 <Sparkles className="w-4 h-4 text-indigo-400" />
                 <span>Create 24h Status Update</span>
               </h3>
-              <button onClick={() => setShowCreateModal(false)} className="p-1 text-slate-400">
+              <button onClick={() => setShowCreateModal(false)} className="p-1 text-slate-400 hover:text-white">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -124,6 +125,7 @@ export const StoriesBar: React.FC = () => {
                 className="w-full bg-transparent border-none text-white text-base font-bold placeholder-white/60 focus:outline-none text-center resize-none"
                 rows={3}
                 maxLength={140}
+                autoFocus
               />
             </div>
 
@@ -148,12 +150,13 @@ export const StoriesBar: React.FC = () => {
               Share Status Update
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* Story Viewer Drawer */}
-      {activeStory && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-fade-in">
+      {/* Story Viewer Drawer (Portaled to document.body) */}
+      {activeStory && ReactDOM.createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-fade-in">
           <div
             className={`w-full max-w-sm h-[520px] rounded-3xl bg-gradient-to-br ${activeStory.bgGradient} p-6 flex flex-col justify-between text-white relative shadow-2xl overflow-hidden`}
           >
@@ -163,7 +166,7 @@ export const StoriesBar: React.FC = () => {
                 <AnimatedAvatar src={activeStory.profilePicture} name={activeStory.username} size="xs" />
                 <span className="font-bold text-xs">{activeStory.username}</span>
               </div>
-              <button onClick={() => setActiveStory(null)} className="p-1 rounded-full bg-black/30">
+              <button onClick={() => setActiveStory(null)} className="p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-white">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -179,7 +182,8 @@ export const StoriesBar: React.FC = () => {
               <span>{activeStory.views.length} views</span>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
