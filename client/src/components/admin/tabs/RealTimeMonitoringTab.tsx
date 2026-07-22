@@ -28,23 +28,29 @@ const RealTimeMonitoringTab: React.FC<RealTimeMonitoringTabProps> = ({ socket })
 
       const handleUpdate = (updatedMetrics: TelemetryMetrics) => {
         setMetrics(updatedMetrics);
+      };
+
+      const handleSystemEvent = (evt: { id: string; time: string; type: string; message: string }) => {
         const newLog = {
-          id: Date.now().toString(),
-          time: new Date().toLocaleTimeString(),
-          type: 'METRICS_TICK',
-          msg: `Telemetry update received: CPU ${updatedMetrics.cpuUsage}%, RAM ${updatedMetrics.memoryUsagePct}%, DB ${updatedMetrics.dbLatencyMs}ms`,
+          id: evt.id || Date.now().toString(),
+          time: evt.time || new Date().toLocaleTimeString(),
+          type: evt.type || 'SYSTEM_EVENT',
+          msg: `[${evt.type}] ${evt.message}`,
         };
-        setEventLogs((prev) => [newLog, ...prev.slice(0, 15)]);
+        setEventLogs((prev) => [newLog, ...prev.slice(0, 25)]);
       };
 
       socket.on('admin_metrics_update', handleUpdate);
+      socket.on('admin_system_event', handleSystemEvent);
 
       return () => {
         socket.emit('leave_admin_metrics');
         socket.off('admin_metrics_update', handleUpdate);
+        socket.off('admin_system_event', handleSystemEvent);
       };
     }
   }, [socket]);
+
 
   return (
     <div className="space-y-6">

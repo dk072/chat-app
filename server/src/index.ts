@@ -16,7 +16,7 @@ import messageRoutes from './routes/messageRoutes';
 import adminRoutes from './routes/adminRoutes';
 import advancedAdminRoutes from './routes/advancedAdminRoutes';
 import callRoutes from './routes/callRoutes';
-import { initializeSocket } from './services/socketService';
+import { initializeSocket, getActiveCallsCount } from './services/socketService';
 import { errorHandler, notFound } from './middlewares/errorMiddleware';
 import { getPerformanceMetrics, recordApiLatency } from './services/performanceService';
 import prisma from './config/db';
@@ -60,12 +60,14 @@ initializeSocket(io);
 setInterval(async () => {
   try {
     const onlineUsersCount = await prisma.user.count({ where: { isOnline: true } });
-    const metrics = await getPerformanceMetrics(0, onlineUsersCount);
+    const activeCalls = getActiveCallsCount();
+    const metrics = await getPerformanceMetrics(activeCalls, onlineUsersCount);
     io.to('admin_metrics_room').emit('admin_metrics_update', metrics);
   } catch (err) {
     // Silent fail in telemetry ticker
   }
 }, 3000);
+
 
 // Core Middlewares
 app.use(compression());

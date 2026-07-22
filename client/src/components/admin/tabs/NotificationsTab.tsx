@@ -1,24 +1,31 @@
 import React, { useState } from 'react';
 import { Bell, Send, AlertTriangle, ShieldCheck, Megaphone } from 'lucide-react';
+import api from '../../../services/api';
 
 const NotificationsTab: React.FC = () => {
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [sentAlerts, setSentAlerts] = useState<any[]>([]);
 
-  const handleBroadcast = () => {
+  const handleBroadcast = async () => {
     if (!title.trim() || !message.trim()) return;
-    const newAlert = {
-      id: Date.now().toString(),
-      title,
-      message,
-      timestamp: new Date().toLocaleTimeString(),
-    };
-    setSentAlerts([newAlert, ...sentAlerts]);
-    setTitle('');
-    setMessage('');
-    alert('System announcement broadcasted to all connected clients!');
+    try {
+      await api.post('/admin/advanced/announcements/broadcast', { title, message });
+      const newAlert = {
+        id: Date.now().toString(),
+        title,
+        message,
+        timestamp: new Date().toLocaleTimeString(),
+      };
+      setSentAlerts([newAlert, ...sentAlerts]);
+      setTitle('');
+      setMessage('');
+      alert('System announcement broadcasted to all connected clients!');
+    } catch (err) {
+      alert('Failed to broadcast announcement.');
+    }
   };
+
 
   return (
     <div className="space-y-6">

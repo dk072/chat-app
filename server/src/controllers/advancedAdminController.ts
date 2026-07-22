@@ -229,3 +229,30 @@ export const copilotQueryHandler = async (req: Request, res: Response) => {
     return res.status(500).json({ message: 'Error processing AI copilot query.' });
   }
 };
+
+export const broadcastAnnouncementHandler = async (req: Request, res: Response) => {
+  const { title, message } = req.body;
+  const adminId = (req as any).user?.id || 'admin';
+  const io = req.app.get('io');
+  try {
+    if (io) {
+      io.emit('system_announcement', {
+        id: Date.now().toString(),
+        title,
+        message,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    await logAdminAction({
+      adminId,
+      action: 'BROADCAST_ANNOUNCEMENT',
+      details: { title, message },
+    });
+
+    return res.json({ message: 'System announcement broadcasted successfully.' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error broadcasting announcement.' });
+  }
+};
+

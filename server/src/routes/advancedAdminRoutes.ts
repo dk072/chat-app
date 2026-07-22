@@ -21,6 +21,7 @@ import {
   getFeatureFlagsHandler,
   toggleFeatureFlagHandler,
   copilotQueryHandler,
+  broadcastAnnouncementHandler,
 } from '../controllers/advancedAdminController';
 
 const router = Router();
@@ -66,4 +67,8 @@ router.post('/feature-flags/toggle', toggleFeatureFlagHandler);
 // AI Copilot
 router.post('/copilot', copilotQueryHandler);
 
+// System Announcements Broadcast
+router.post('/announcements/broadcast', broadcastAnnouncementHandler);
+
 export default router;
+

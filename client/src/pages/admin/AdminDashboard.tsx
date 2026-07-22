@@ -18,6 +18,8 @@ import {
   Bell,
   Sparkles,
   Command,
+  Menu,
+  X,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
@@ -60,7 +62,9 @@ const Dashboard: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [adminSocket, setAdminSocket] = useState<any>(null);
+  const [systemToast, setSystemToast] = useState<{ title: string; message: string } | null>(null);
 
   const navigate = useNavigate();
 
@@ -86,13 +90,21 @@ const Dashboard: React.FC = () => {
     loadData();
   }, [searchQuery]);
 
-  // Setup Socket connection for real-time telemetry
+  // Setup Socket connection for real-time telemetry and announcements
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const socketInstance = io({
+    const socketUrl = import.meta.env.VITE_API_URL || window.location.origin;
+    const socketInstance = io(socketUrl, {
       auth: { token },
       withCredentials: true,
+      transports: ['websocket', 'polling'],
     });
+
+    socketInstance.on('system_announcement', (announcement: { title: string; message: string }) => {
+      setSystemToast(announcement);
+      setTimeout(() => setSystemToast(null), 8000);
+    });
+
     setAdminSocket(socketInstance);
 
     return () => {
@@ -139,11 +151,193 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const renderNavItems = () => (
+    <div className="flex-1 px-3 space-y-1 overflow-y-auto min-h-0 text-xs font-medium scrollbar-thin">
+      <div className="px-3 py-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Core Management</div>
+      <button
+        onClick={() => { setActiveTab('users'); setIsMobileSidebarOpen(false); }}
+        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+          activeTab === 'users' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
+        }`}
+      >
+        <Users className="w-4 h-4" />
+        <span>Users</span>
+      </button>
+      <button
+        onClick={() => { setActiveTab('reports'); setIsMobileSidebarOpen(false); }}
+        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+          activeTab === 'reports' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
+        }`}
+      >
+        <AlertOctagon className="w-4 h-4" />
+        <span>Reports</span>
+      </button>
+      <button
+        onClick={() => { setActiveTab('analytics'); setIsMobileSidebarOpen(false); }}
+        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+          activeTab === 'analytics' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
+        }`}
+      >
+        <BarChart2 className="w-4 h-4" />
+        <span>Analytics</span>
+      </button>
+
+      <div className="px-3 pt-3 py-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Advanced Enterprise</div>
+
+      <button
+        onClick={() => { setActiveTab('realtime'); setIsMobileSidebarOpen(false); }}
+        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+          activeTab === 'realtime' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
+        }`}
+      >
+        <Activity className="w-4 h-4 text-emerald-400" />
+        <span>Real-Time Monitor</span>
+      </button>
+
+      <button
+        onClick={() => { setActiveTab('moderation'); setIsMobileSidebarOpen(false); }}
+        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+          activeTab === 'moderation' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
+        }`}
+      >
+        <Bot className="w-4 h-4 text-indigo-400" />
+        <span>AI Moderation</span>
+      </button>
+
+      <button
+        onClick={() => { setActiveTab('intelligence'); setIsMobileSidebarOpen(false); }}
+        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+          activeTab === 'intelligence' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
+        }`}
+      >
+        <Users className="w-4 h-4 text-brand-400" />
+        <span>User Intelligence</span>
+      </button>
+
+      <button
+        onClick={() => { setActiveTab('investigation'); setIsMobileSidebarOpen(false); }}
+        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+          activeTab === 'investigation' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
+        }`}
+      >
+        <Search className="w-4 h-4 text-amber-400" />
+        <span>Chat Investigation</span>
+      </button>
+
+      <button
+        onClick={() => { setActiveTab('security'); setIsMobileSidebarOpen(false); }}
+        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+          activeTab === 'security' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
+        }`}
+      >
+        <Lock className="w-4 h-4 text-rose-400" />
+        <span>Security & Audit</span>
+      </button>
+
+      <button
+        onClick={() => { setActiveTab('fileprotection'); setIsMobileSidebarOpen(false); }}
+        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+          activeTab === 'fileprotection' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
+        }`}
+      >
+        <FolderKey className="w-4 h-4 text-sky-400" />
+        <span>File Protection</span>
+      </button>
+
+      <button
+        onClick={() => { setActiveTab('performance'); setIsMobileSidebarOpen(false); }}
+        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+          activeTab === 'performance' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
+        }`}
+      >
+        <Cpu className="w-4 h-4 text-purple-400" />
+        <span>Performance</span>
+      </button>
+
+      <button
+        onClick={() => { setActiveTab('devtools'); setIsMobileSidebarOpen(false); }}
+        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+          activeTab === 'devtools' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
+        }`}
+      >
+        <Terminal className="w-4 h-4 text-cyan-400" />
+        <span>Developer Tools</span>
+      </button>
+
+      <button
+        onClick={() => { setActiveTab('notifications'); setIsMobileSidebarOpen(false); }}
+        className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
+          activeTab === 'notifications' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
+        }`}
+      >
+        <Bell className="w-4 h-4 text-amber-400" />
+        <span>Alert Dispatcher</span>
+      </button>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-      {/* Sidebar */}
+    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
+      {/* Real-Time System Toast Banner */}
+      {systemToast && (
+        <div className="fixed top-4 right-4 z-50 p-4 bg-slate-900 text-white rounded-2xl shadow-2xl border border-brand-500 flex items-start space-x-3 max-w-sm animate-bounce">
+          <Bell className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <div className="flex-1 text-xs">
+            <h4 className="font-bold text-white mb-0.5">{systemToast.title}</h4>
+            <p className="text-slate-300">{systemToast.message}</p>
+          </div>
+          <button onClick={() => setSystemToast(null)} className="text-slate-400 hover:text-white">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Mobile Top Navbar */}
+      <div className="md:hidden bg-slate-900 p-4 flex justify-between items-center text-white sticky top-0 z-40">
+        <div className="flex items-center space-x-2">
+          <Shield className="w-6 h-6 text-brand-400" />
+          <span className="font-bold text-sm">Enterprise Admin</span>
+        </div>
+        <button onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)} className="p-2 rounded-xl bg-slate-800">
+          {isMobileSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </div>
+
+      {/* Mobile Slide-Out Drawer */}
+      {isMobileSidebarOpen && (
+        <div className="md:hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex">
+          <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col h-full border-r border-slate-800 p-4 space-y-4">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-800">
+              <span className="font-bold text-white text-sm">Admin Navigation</span>
+              <button onClick={() => setIsMobileSidebarOpen(false)} className="p-1 text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {renderNavItems()}
+            <div className="pt-2 border-t border-slate-800 space-y-2">
+              <button
+                onClick={() => { setIsCopilotOpen(true); setIsMobileSidebarOpen(false); }}
+                className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-brand-500 to-indigo-600 text-white rounded-xl text-xs font-bold"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>AI Copilot</span>
+              </button>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-semibold"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </aside>
+          <div className="flex-1" onClick={() => setIsMobileSidebarOpen(false)} />
+        </div>
+      )}
+
+      {/* Desktop Sidebar */}
       <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col hidden md:flex h-screen sticky top-0 shrink-0 border-r border-slate-800">
-        <div className="p-6 flex items-center space-x-3 mb-2">
+        <div className="p-6 flex items-center space-x-3 mb-2 shrink-0">
           <div className="w-10 h-10 bg-gradient-to-tr from-brand-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-md">
             <Shield className="text-white w-6 h-6" />
           </div>
@@ -153,130 +347,9 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <nav className="flex-1 px-3 space-y-1 overflow-y-auto max-h-[calc(100vh-140px)] text-xs font-medium">
-          <div className="px-3 py-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Core Management</div>
-          <button
-            onClick={() => setActiveTab('users')}
-            className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
-              activeTab === 'users' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            <span>Users</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('reports')}
-            className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
-              activeTab === 'reports' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <AlertOctagon className="w-4 h-4" />
-            <span>Reports</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('analytics')}
-            className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
-              activeTab === 'analytics' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <BarChart2 className="w-4 h-4" />
-            <span>Analytics</span>
-          </button>
+        {renderNavItems()}
 
-          <div className="px-3 pt-3 py-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Advanced Enterprise</div>
-
-          <button
-            onClick={() => setActiveTab('realtime')}
-            className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
-              activeTab === 'realtime' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Activity className="w-4 h-4 text-emerald-400" />
-            <span>Real-Time Monitor</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('moderation')}
-            className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
-              activeTab === 'moderation' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Bot className="w-4 h-4 text-indigo-400" />
-            <span>AI Moderation</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('intelligence')}
-            className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
-              activeTab === 'intelligence' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Users className="w-4 h-4 text-brand-400" />
-            <span>User Intelligence</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('investigation')}
-            className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
-              activeTab === 'investigation' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Search className="w-4 h-4 text-amber-400" />
-            <span>Chat Investigation</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('security')}
-            className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
-              activeTab === 'security' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Lock className="w-4 h-4 text-rose-400" />
-            <span>Security & Audit</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('fileprotection')}
-            className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
-              activeTab === 'fileprotection' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <FolderKey className="w-4 h-4 text-sky-400" />
-            <span>File Protection</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('performance')}
-            className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
-              activeTab === 'performance' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Cpu className="w-4 h-4 text-purple-400" />
-            <span>Performance</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('devtools')}
-            className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
-              activeTab === 'devtools' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Terminal className="w-4 h-4 text-cyan-400" />
-            <span>Developer Tools</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('notifications')}
-            className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
-              activeTab === 'notifications' ? 'bg-brand-500/10 text-brand-400 font-bold' : 'hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Bell className="w-4 h-4 text-amber-400" />
-            <span>Alert Dispatcher</span>
-          </button>
-        </nav>
-
-        <div className="p-4 border-t border-slate-800 space-y-2">
+        <div className="p-4 border-t border-slate-800 space-y-2 shrink-0">
           <button
             onClick={() => setIsCopilotOpen(true)}
             className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-brand-500 to-indigo-600 hover:from-brand-600 hover:to-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md"
@@ -294,6 +367,7 @@ const Dashboard: React.FC = () => {
           </button>
         </div>
       </aside>
+
 
       {/* Main Content Area */}
       <main className="flex-1 overflow-x-hidden p-8 flex flex-col space-y-6">

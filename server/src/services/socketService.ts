@@ -2,6 +2,26 @@ import { Server, Socket } from 'socket.io';
 import { verifyToken } from '../utils/jwt';
 import prisma from '../config/db';
 
+const activeCallsMap = new Set<string>();
+
+export const getActiveCallsCount = (): number => {
+  return activeCallsMap.size;
+};
+
+export const emitAdminSystemEvent = (io: Server, type: string, message: string, metadata: any = {}) => {
+  try {
+    io.to('admin_metrics_room').emit('admin_system_event', {
+      id: Date.now().toString(),
+      time: new Date().toLocaleTimeString(),
+      type,
+      message,
+      metadata,
+    });
+  } catch (err) {
+    console.error('Error emitting admin system event:', err);
+  }
+};
+
 export const initializeSocket = (io: Server) => {
   // Middleware: Authenticate socket handshake using JWT
   io.use((socket, next) => {
@@ -44,6 +64,8 @@ export const initializeSocket = (io: Server) => {
         status: user.status,
         lastSeen: user.lastSeen.toISOString(),
       });
+
+      emitAdminSystemEvent(io, 'USER_ONLINE', `@${user.username} connected online`, { userId });
     } catch (err) {
       console.error('Socket connection status update failed:', err);
     }
@@ -128,6 +150,8 @@ export const initializeSocket = (io: Server) => {
           callType,
           conversationId
         });
+
+        emitAdminSystemEvent(io, 'CALL_INITIATED', `${callType} call started by @${caller?.username || userId}`);
       } catch (e) {
         console.error('Call start error', e);
       }
@@ -148,10 +172,14 @@ export const initializeSocket = (io: Server) => {
           }
         });
 
+        activeCallsMap.add(callRecord.id);
+
         emitToPartner(callerId, 'call:accepted', {
           receiverId: userId,
           callId: callRecord.id
         });
+
+        emitAdminSystemEvent(io, 'CALL_CONNECTED', `Voice/Video call active session connected (Call ID: ${callRecord.id.substring(0, 8)})`);
       } catch (e) {
         console.error('Call accept error', e);
       }
@@ -180,6 +208,8 @@ export const initializeSocket = (io: Server) => {
       const { callId, partnerId, duration } = data;
       
       try {
+        activeCallsMap.delete(callId);
+
         await prisma.call.update({
           where: { id: callId },
           data: {
@@ -188,6 +218,7 @@ export const initializeSocket = (io: Server) => {
           }
         });
         emitToPartner(partnerId, 'call:ended', { callId });
+        emitAdminSystemEvent(io, 'CALL_ENDED', `Call ended after ${duration} seconds`);
       } catch (e) {
         console.error('Call end error', e);
       }
@@ -229,7 +260,7 @@ export const initializeSocket = (io: Server) => {
           const user = await prisma.user.update({
             where: { id: userId },
             data: { isOnline: false, lastSeen },
-            select: { status: true },
+            select: { username: true, status: true },
           });
 
           // Broadcast offline state with lastSeen timestamp
@@ -239,6 +270,8 @@ export const initializeSocket = (io: Server) => {
             status: user.status,
             lastSeen: lastSeen.toISOString(),
           });
+
+          emitAdminSystemEvent(io, 'USER_OFFLINE', `@${user.username} disconnected`, { userId });
         } catch (err) {
           console.error('Socket disconnect status update failed:', err);
         }
