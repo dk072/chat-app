@@ -20,6 +20,7 @@ import {
   Command,
   Menu,
   X,
+  MessageSquareX,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
@@ -140,6 +141,20 @@ const Dashboard: React.FC = () => {
       alert('Failed to delete user');
     }
   };
+
+  const handlePurgeUserMessages = async (userId: string, username: string) => {
+    if (!window.confirm(`Are you sure you want to delete ALL messages sent by @${username}? This action is permanent.`)) {
+      return;
+    }
+    try {
+      const res = await api.post(`/admin/advanced/users/${userId}/purge-messages`);
+      alert(res.data.message);
+      loadData();
+    } catch (err) {
+      alert('Failed to purge user messages.');
+    }
+  };
+
 
   const handleResolveReport = async (reportId: string) => {
     try {
@@ -495,7 +510,7 @@ const Dashboard: React.FC = () => {
                             <div className="flex items-center justify-end space-x-2">
                               <button
                                 onClick={() => handleBanToggle(u.id)}
-                                className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                                   u.isBanned
                                     ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
                                     : 'bg-rose-50 text-rose-600 hover:bg-rose-100'
@@ -505,8 +520,16 @@ const Dashboard: React.FC = () => {
                                 <span>{u.isBanned ? 'Unban' : 'Ban'}</span>
                               </button>
                               <button
+                                onClick={() => handlePurgeUserMessages(u.id, u.username)}
+                                className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-amber-50 text-amber-700 hover:bg-amber-100 flex items-center space-x-1"
+                                title="One-click delete all messages sent by this user"
+                              >
+                                <MessageSquareX className="w-3.5 h-3.5 text-amber-600" />
+                                <span>Purge Msgs</span>
+                              </button>
+                              <button
                                 onClick={() => handleDeleteUser(u.id)}
-                                className="px-4 py-1.5 rounded-lg text-xs font-semibold transition-all bg-red-50 text-red-600 hover:bg-red-100 flex items-center space-x-1"
+                                className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-red-50 text-red-600 hover:bg-red-100 flex items-center space-x-1"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                                 <span>Delete</span>

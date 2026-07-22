@@ -22,6 +22,7 @@ import {
   toggleFeatureFlagHandler,
   copilotQueryHandler,
   broadcastAnnouncementHandler,
+  purgeUserMessagesHandler,
 } from '../controllers/advancedAdminController';
 
 const router = Router();
@@ -38,6 +39,9 @@ router.get('/moderation/logs', getModerationLogsHandler);
 
 // User Intelligence
 router.get('/user-intelligence/:userId', getUserIntelligenceHandler);
+
+// Purge all messages sent by target user
+router.post('/users/:userId/purge-messages', purgeUserMessagesHandler);
 
 // Investigation
 router.get('/investigation/timeline/:conversationId', getConversationTimelineHandler);
@@ -71,4 +75,5 @@ router.post('/copilot', copilotQueryHandler);
 router.post('/announcements/broadcast', broadcastAnnouncementHandler);
 
 export default router;
+
 

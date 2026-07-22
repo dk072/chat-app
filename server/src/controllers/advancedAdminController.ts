@@ -256,3 +256,54 @@ export const broadcastAnnouncementHandler = async (req: Request, res: Response) 
   }
 };
 
+export const purgeUserMessagesHandler = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const adminId = (req as any).user?.id || 'admin';
+  const io = req.app.get('io');
+
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return res.status(404).json({ message: 'Target user not found.' });
+    }
+
+    // Find all unique conversations where this user sent messages
+    const userMessages = await prisma.message.findMany({
+      where: { senderId: userId },
+      select: { conversationId: true },
+    });
+
+    const conversationIds = Array.from(new Set(userMessages.map((m) => m.conversationId)));
+
+    // Purge all messages sent by this user
+    const result = await prisma.message.deleteMany({
+      where: { senderId: userId },
+    });
+
+    // Notify active socket rooms for affected conversations
+    if (io) {
+      conversationIds.forEach((convId) => {
+        io.to(convId).emit('messages_purged', { senderId: userId, conversationId: convId });
+      });
+    }
+
+    // Log admin audit action
+    await logAdminAction({
+      adminId,
+      action: 'PURGE_USER_MESSAGES',
+      targetType: 'USER',
+      targetId: userId,
+      details: { deletedCount: result.count, username: user.username },
+    });
+
+    return res.json({
+      message: `Successfully deleted all ${result.count} messages sent by @${user.username}.`,
+      deletedCount: result.count,
+    });
+  } catch (error) {
+    console.error('Error purging user messages:', error);
+    return res.status(500).json({ message: 'Error purging user messages.' });
+  }
+};
+
+

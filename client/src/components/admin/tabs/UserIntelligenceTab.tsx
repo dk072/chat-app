@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Shield, Laptop, Globe, AlertTriangle, CheckCircle, Search, Cpu } from 'lucide-react';
+import { Users, Shield, Laptop, Globe, AlertTriangle, CheckCircle, Search, Cpu, MessageSquareX } from 'lucide-react';
 import api from '../../../services/api';
 import type { UserIntelligence } from '../../../types/admin';
 
@@ -25,13 +25,28 @@ const UserIntelligenceTab: React.FC<UserIntelligenceTabProps> = ({ users }) => {
     }
   };
 
+  const handlePurgeUserMessages = async () => {
+    const selectedUser = users.find((u) => u.id === selectedUserId);
+    const username = selectedUser ? selectedUser.username : 'selected user';
+    if (!window.confirm(`Are you sure you want to delete ALL messages sent by @${username}? This action is permanent.`)) {
+      return;
+    }
+    try {
+      const res = await api.post(`/admin/advanced/users/${selectedUserId}/purge-messages`);
+      alert(res.data.message);
+      fetchProfile(selectedUserId);
+    } catch (err) {
+      alert('Failed to purge user messages.');
+    }
+  };
+
   React.useEffect(() => {
     if (selectedUserId) fetchProfile(selectedUserId);
   }, [selectedUserId]);
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-xl font-bold text-slate-800 flex items-center space-x-2">
             <Users className="w-5 h-5 text-brand-500" />
@@ -40,19 +55,34 @@ const UserIntelligenceTab: React.FC<UserIntelligenceTabProps> = ({ users }) => {
           <p className="text-xs text-slate-500">Multi-Account Detection, Device Signatures & IP Lineage</p>
         </div>
 
-        {/* User Selector Dropdown */}
-        <select
-          value={selectedUserId}
-          onChange={(e) => setSelectedUserId(e.target.value)}
-          className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-500"
-        >
-          {users.map((u) => (
-            <option key={u.id} value={u.id}>
-              {u.username} ({u.email})
-            </option>
-          ))}
-        </select>
+        <div className="flex items-center space-x-3">
+          {/* User Selector Dropdown */}
+          <select
+            value={selectedUserId}
+            onChange={(e) => setSelectedUserId(e.target.value)}
+            className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-500"
+          >
+            {users.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.username} ({u.email})
+              </option>
+            ))}
+          </select>
+
+          {/* Purge All Messages Button */}
+          {selectedUserId && (
+            <button
+              onClick={handlePurgeUserMessages}
+              className="px-4 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold rounded-xl text-xs flex items-center space-x-1.5 transition-all border border-amber-200"
+              title="One-click delete all messages sent by this user"
+            >
+              <MessageSquareX className="w-4 h-4 text-amber-600" />
+              <span>Purge All Messages</span>
+            </button>
+          )}
+        </div>
       </div>
+
 
       {profile && (
         <div className="space-y-6">
