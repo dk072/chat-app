@@ -59,6 +59,17 @@ export const initializeSocket = (io: Server) => {
       console.log(`User ${userId} left room: ${conversationId}`);
     });
 
+    // Join / Leave Admin Telemetry Channel
+    socket.on('join_admin_metrics', () => {
+      socket.join('admin_metrics_room');
+      console.log(`Admin user ${userId} joined admin_metrics_room`);
+    });
+
+    socket.on('leave_admin_metrics', () => {
+      socket.leave('admin_metrics_room');
+    });
+
+
     // Real-time typing indicators
     socket.on('typing', ({ conversationId, isTyping }: { conversationId: string; isTyping: boolean }) => {
       socket.to(conversationId).emit('typing', {

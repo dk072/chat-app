@@ -142,3 +142,86 @@ model Call {
   conversation   Conversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 }
 
+model AdminAuditLog {
+  id         String   @id @default(uuid())
+  adminId    String
+  action     String   // E.g., "BAN_USER", "TOGGLE_FEATURE_FLAG", "CLEAR_CACHE"
+  targetType String?  // E.g., "USER", "REPORT", "SYSTEM"
+  targetId   String?
+  ipAddress  String?
+  details    String?  // JSON string
+  createdAt  DateTime @default(now())
+}
+
+model UserSession {
+  id            String   @id @default(uuid())
+  userId        String
+  device        String?
+  browser       String?
+  os            String?
+  ipAddress     String?
+  country       String?
+  isVpn         Boolean  @default(false)
+  isDisposable  Boolean  @default(false)
+  riskScore     Int      @default(0)
+  isCurrentActive Boolean @default(true)
+  lastActive    DateTime @default(now())
+  createdAt     DateTime @default(now())
+}
+
+model IpRule {
+  id        String   @id @default(uuid())
+  ip        String   @unique
+  type      String   // "BLACKLIST" or "WHITELIST"
+  reason    String?
+  addedBy   String?
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+}
+
+model FeatureFlag {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  name        String
+  description String?
+  isEnabled   Boolean  @default(false)
+  rules       String   @default("{}") // JSON string
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+}
+
+model IncidentAlert {
+  id        String   @id @default(uuid())
+  severity  String   // "CRITICAL", "WARNING", "INFO"
+  type      String   // "DOWNTIME", "SECURITY", "SUSPICIOUS_LOGIN", "PAYMENT", "ERROR_RATE"
+  title     String
+  message   String
+  metadata  String   @default("{}")
+  isResolved Boolean @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AIModerationLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  messageId   String?
+  contentType String   // "TEXT", "IMAGE", "ACCOUNT"
+  flaggedCategories String // JSON array e.g., ["SPAM", "HATE_SPEECH"]
+  riskScore   Int      @default(0)
+  actionTaken String?  // "WARNING", "MUTE", "BAN", "NONE"
+  reason      String?
+  createdAt   DateTime @default(now())
+}
+
+model ApprovalRequest {
+  id           String   @id @default(uuid())
+  actionType   String   // "DELETE_USER", "PERMANENT_BAN", "FLUSH_DB"
+  requestedBy  String
+  approvedBy   String?
+  targetId     String?
+  payload      String   @default("{}")
+  status       String   @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
+  createdAt    DateTime @default(now())
+}
+
+

@@ -14,9 +14,12 @@ import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import messageRoutes from './routes/messageRoutes';
 import adminRoutes from './routes/adminRoutes';
+import advancedAdminRoutes from './routes/advancedAdminRoutes';
 import callRoutes from './routes/callRoutes';
 import { initializeSocket } from './services/socketService';
 import { errorHandler, notFound } from './middlewares/errorMiddleware';
+import { getPerformanceMetrics, recordApiLatency } from './services/performanceService';
+import prisma from './config/db';
 
 dotenv.config();
 
@@ -53,6 +56,17 @@ if (process.env.REDIS_URL) {
 // Setup Socket lifecycle handlers
 initializeSocket(io);
 
+// Real-Time Telemetry Broadcast Loop for Admin Dashboard (every 3 seconds)
+setInterval(async () => {
+  try {
+    const onlineUsersCount = await prisma.user.count({ where: { isOnline: true } });
+    const metrics = await getPerformanceMetrics(0, onlineUsersCount);
+    io.to('admin_metrics_room').emit('admin_metrics_update', metrics);
+  } catch (err) {
+    // Silent fail in telemetry ticker
+  }
+}, 3000);
+
 // Core Middlewares
 app.use(compression());
 app.use(
@@ -71,6 +85,16 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Latency recording middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    recordApiLatency(duration);
+  });
+  next();
+});
+
 // Resolve and create uploads fallback directories if they don't exist
 const uploadsDir = path.join(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadsDir)) {
@@ -84,7 +108,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin/advanced', advancedAdminRoutes);
 app.use('/api/calls', callRoutes);
+
 
 // Health check endpoint
 app.get('/health', (req, res) => {
