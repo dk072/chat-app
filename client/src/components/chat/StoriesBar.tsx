@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { Plus, X, Eye, Sparkles } from 'lucide-react';
+import { Plus, X, Eye, Sparkles, Image, Trash2 } from 'lucide-react';
 import api from '../../services/api';
 import AnimatedAvatar from '../ui/AnimatedAvatar';
 import { useAuth } from '../../context/AuthContext';
@@ -24,6 +24,8 @@ export const StoriesBar: React.FC = () => {
   const [activeStory, setActiveStory] = useState<Story | null>(null);
   const [storyText, setStoryText] = useState('');
   const [selectedGradient, setSelectedGradient] = useState('from-indigo-600 to-purple-600');
+  const [bgImage, setBgImage] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const gradients = [
     'from-indigo-600 to-purple-600',
@@ -54,15 +56,28 @@ export const StoriesBar: React.FC = () => {
     } catch (e) {}
   };
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setBgImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handlePostStory = async () => {
-    if (!storyText.trim()) return;
+    if (!storyText.trim() && !bgImage) return;
     try {
       await api.post('/nextgen/stories', {
         text: storyText.trim(),
         bgGradient: selectedGradient,
+        mediaUrl: bgImage || undefined,
       });
       setShowCreateModal(false);
       setStoryText('');
+      setBgImage(null);
       fetchStories();
     } catch (e) {
       alert('Error posting story');
@@ -128,33 +143,71 @@ export const StoriesBar: React.FC = () => {
             <div
               className={`w-full h-56 rounded-2xl bg-gradient-to-br ${selectedGradient} p-6 flex items-center justify-center text-center shadow-lg relative overflow-hidden`}
             >
+              {bgImage && (
+                <>
+                  <img src={bgImage} alt="background photo" className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" />
+                </>
+              )}
               <textarea
                 value={storyText}
                 onChange={(e) => setStoryText(e.target.value)}
                 placeholder="Type your status message..."
-                className="w-full bg-transparent border-none text-white text-base font-bold placeholder-white/60 focus:outline-none text-center resize-none"
+                className="w-full bg-transparent border-none text-white text-base font-bold placeholder-white/70 focus:outline-none text-center resize-none z-10 drop-shadow-md"
                 rows={3}
                 maxLength={140}
                 autoFocus
               />
             </div>
 
-            {/* Gradient Selector */}
-            <div className="flex justify-center space-x-2">
-              {gradients.map((grad, i) => (
+            {/* Background Photo & Gradient Selector Controls */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
                 <button
-                  key={i}
-                  onClick={() => setSelectedGradient(grad)}
-                  className={`w-6 h-6 rounded-full bg-gradient-to-br ${grad} border-2 ${
-                    selectedGradient === grad ? 'border-white scale-110' : 'border-transparent'
-                  }`}
+                  onClick={() => imageInputRef.current?.click()}
+                  type="button"
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center space-x-1.5 border border-slate-700 transition-colors"
+                >
+                  <Image className="w-4 h-4 text-indigo-400" />
+                  <span>{bgImage ? 'Change Photo' : 'Background Photo'}</span>
+                </button>
+                <input
+                  type="file"
+                  ref={imageInputRef}
+                  onChange={handleImageSelect}
+                  accept="image/*"
+                  className="hidden"
                 />
-              ))}
+
+                {bgImage && (
+                  <button
+                    onClick={() => setBgImage(null)}
+                    type="button"
+                    className="text-[11px] font-bold text-rose-400 hover:text-rose-300 flex items-center space-x-1"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Remove Photo</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Color Gradient Presets */}
+              <div className="flex justify-center space-x-2 pt-1">
+                {gradients.map((grad, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedGradient(grad)}
+                    className={`w-6 h-6 rounded-full bg-gradient-to-br ${grad} border-2 ${
+                      selectedGradient === grad ? 'border-white scale-110' : 'border-transparent'
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
 
             <button
               onClick={handlePostStory}
-              disabled={!storyText.trim()}
+              disabled={!storyText.trim() && !bgImage}
               className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all"
             >
               Share Status Update
@@ -170,6 +223,18 @@ export const StoriesBar: React.FC = () => {
           <div
             className={`w-full max-w-sm h-[520px] rounded-3xl bg-gradient-to-br ${activeStory.bgGradient} p-6 flex flex-col justify-between text-white relative shadow-2xl overflow-hidden`}
           >
+            {/* Background Photo if attached */}
+            {activeStory.mediaUrl && (
+              <>
+                <img
+                  src={activeStory.mediaUrl}
+                  alt="Story background"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" />
+              </>
+            )}
+
             {/* Top Bar */}
             <div className="flex justify-between items-center z-10">
               <div className="flex items-center space-x-2">
