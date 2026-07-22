@@ -3,6 +3,10 @@ export interface TelemetryMetrics {
   freeMemoryMB: number;
   totalMemoryMB: number;
   memoryUsagePct: number;
+  totalDiskGB?: number;
+  freeDiskGB?: number;
+  usedDiskGB?: number;
+  diskUsagePct?: number;
   uptimeSeconds: number;
   activeCalls: number;
   activeConversations: number;
