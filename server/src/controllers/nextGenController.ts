@@ -10,10 +10,7 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
-// In-Memory Storage for Next-Gen dynamic features (Stories, Polls, Starred Messages, Disappearing Timers)
-const starredMessagesMap = new Map<string, Set<string>>(); // userId -> Set<messageId>
-const pollStore = new Map<string, { id: string; question: string; options: { text: string; votes: string[] }[]; isAnonymous: boolean; createdBy: string }>();
-const storiesStore: { id: string; userId: string; username: string; profilePicture: string; mediaUrl?: string; text?: string; bgGradient: string; views: string[]; createdAt: string }[] = [];
+// Persistent Settings Cache
 const disappearingTimersMap = new Map<string, number>(); // conversationId -> timerHours
 
 export const improveTextHandler = async (req: Request, res: Response) => {
@@ -72,18 +69,23 @@ export const toggleStarMessageHandler = async (req: Request, res: Response) => {
   const { messageId } = req.params;
 
   try {
-    if (!starredMessagesMap.has(userId)) {
-      starredMessagesMap.set(userId, new Set());
-    }
+    const existingStar = await prisma.starredItem.findUnique({
+      where: {
+        userId_messageId: { userId, messageId },
+      },
+    });
 
-    const userStars = starredMessagesMap.get(userId)!;
     let isStarred = false;
 
-    if (userStars.has(messageId)) {
-      userStars.delete(messageId);
+    if (existingStar) {
+      await prisma.starredItem.delete({
+        where: { id: existingStar.id },
+      });
       isStarred = false;
     } else {
-      userStars.add(messageId);
+      await prisma.starredItem.create({
+        data: { userId, messageId },
+      });
       isStarred = true;
     }
 
@@ -98,8 +100,10 @@ export const getStarredMessagesHandler = async (req: Request, res: Response) => 
   const userId = authReq.user!.id;
 
   try {
-    const userStars = starredMessagesMap.get(userId) || new Set();
-    const messageIds = Array.from(userStars);
+    const starredItems = await prisma.starredItem.findMany({
+      where: { userId },
+    });
+    const messageIds = starredItems.map((s) => s.messageId);
 
     const messages = await prisma.message.findMany({
       where: { id: { in: messageIds }, isDeletedForEveryone: false },
@@ -126,15 +130,26 @@ export const createPollHandler = async (req: Request, res: Response) => {
 
   try {
     const pollId = `poll_${Date.now()}`;
-    const pollData = {
-      id: pollId,
-      question,
-      options: options.map((opt: string) => ({ text: opt, votes: [] })),
-      isAnonymous,
-      createdBy: userId,
-    };
+    const formattedOptions = options.map((opt: string) => ({ text: opt, votes: [] }));
 
-    pollStore.set(pollId, pollData);
+    const createdPoll = await prisma.inChatPoll.create({
+      data: {
+        pollId,
+        conversationId,
+        question,
+        options: JSON.stringify(formattedOptions),
+        isAnonymous,
+        createdBy: userId,
+      },
+    });
+
+    const pollData = {
+      id: createdPoll.pollId,
+      question: createdPoll.question,
+      options: JSON.parse(createdPoll.options),
+      isAnonymous: createdPoll.isAnonymous,
+      createdBy: createdPoll.createdBy,
+    };
 
     // Save as a SPECIAL POLL message in conversation
     const message = await prisma.message.create({
@@ -169,29 +184,45 @@ export const votePollHandler = async (req: Request, res: Response) => {
   const { optionIndex, conversationId } = req.body;
 
   try {
-    const poll = pollStore.get(pollId);
-    if (!poll) {
+    const dbPoll = await prisma.inChatPoll.findUnique({
+      where: { pollId },
+    });
+
+    if (!dbPoll) {
       return res.status(404).json({ message: 'Poll not found.' });
     }
 
+    const optionsList: { text: string; votes: string[] }[] = JSON.parse(dbPoll.options);
+
     // Remove user previous vote from all options
-    poll.options.forEach((opt) => {
+    optionsList.forEach((opt) => {
       opt.votes = opt.votes.filter((v) => v !== userId);
     });
 
     // Add vote to target option
-    if (poll.options[optionIndex]) {
-      poll.options[optionIndex].votes.push(userId);
+    if (optionsList[optionIndex]) {
+      optionsList[optionIndex].votes.push(userId);
     }
 
-    pollStore.set(pollId, poll);
+    const updatedPoll = await prisma.inChatPoll.update({
+      where: { id: dbPoll.id },
+      data: { options: JSON.stringify(optionsList) },
+    });
+
+    const pollData = {
+      id: updatedPoll.pollId,
+      question: updatedPoll.question,
+      options: JSON.parse(updatedPoll.options),
+      isAnonymous: updatedPoll.isAnonymous,
+      createdBy: updatedPoll.createdBy,
+    };
 
     const io = req.app.get('io');
     if (io && conversationId) {
-      io.to(conversationId).emit('poll_updated', poll);
+      io.to(conversationId).emit('poll_updated', pollData);
     }
 
-    return res.json({ poll });
+    return res.json({ poll: pollData });
   } catch (error) {
     return res.status(500).json({ message: 'Error recording poll vote.' });
   }
@@ -199,9 +230,24 @@ export const votePollHandler = async (req: Request, res: Response) => {
 
 export const getPollHandler = async (req: Request, res: Response) => {
   const { pollId } = req.params;
-  const poll = pollStore.get(pollId);
-  if (!poll) return res.status(404).json({ message: 'Poll not found.' });
-  return res.json({ poll });
+  try {
+    const dbPoll = await prisma.inChatPoll.findUnique({
+      where: { pollId },
+    });
+    if (!dbPoll) return res.status(404).json({ message: 'Poll not found.' });
+    
+    return res.json({
+      poll: {
+        id: dbPoll.pollId,
+        question: dbPoll.question,
+        options: JSON.parse(dbPoll.options),
+        isAnonymous: dbPoll.isAnonymous,
+        createdBy: dbPoll.createdBy,
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({ message: 'Error retrieving poll.' });
+  }
 };
 
 export const createStoryHandler = async (req: Request, res: Response) => {
@@ -212,38 +258,67 @@ export const createStoryHandler = async (req: Request, res: Response) => {
   try {
     const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
 
-    const story = {
-      id: `story_${Date.now()}`,
-      userId: user.id,
-      username: dbUser?.username || user.username,
-      profilePicture: dbUser?.profilePicture || '',
-      text,
-      mediaUrl,
-      bgGradient,
-      views: [],
-      createdAt: new Date().toISOString(),
-    };
+    const createdStory = await prisma.userStory.create({
+      data: {
+        userId: user.id,
+        username: dbUser?.username || user.username,
+        profilePicture: dbUser?.profilePicture || '',
+        text,
+        mediaUrl,
+        bgGradient,
+        views: JSON.stringify([]),
+      },
+    });
 
-    storiesStore.unshift(story);
+    const storyData = {
+      id: createdStory.id,
+      userId: createdStory.userId,
+      username: createdStory.username,
+      profilePicture: createdStory.profilePicture || '',
+      text: createdStory.text,
+      mediaUrl: createdStory.mediaUrl,
+      bgGradient: createdStory.bgGradient,
+      views: [],
+      createdAt: createdStory.createdAt.toISOString(),
+    };
 
     const io = req.app.get('io');
     if (io) {
-      io.emit('new_story_posted', story);
+      io.emit('new_story_posted', storyData);
     }
 
-    return res.status(201).json({ story });
+    return res.status(201).json({ story: storyData });
   } catch (error) {
     return res.status(500).json({ message: 'Error posting story.' });
   }
 };
 
 export const getStoriesHandler = async (req: Request, res: Response) => {
-  // Filter stories younger than 24 hours
-  const now = Date.now();
-  const activeStories = storiesStore.filter(
-    (s) => now - new Date(s.createdAt).getTime() < 24 * 60 * 60 * 1000
-  );
-  return res.json({ stories: activeStories });
+  try {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const dbStories = await prisma.userStory.findMany({
+      where: {
+        createdAt: { gte: twentyFourHoursAgo },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const activeStories = dbStories.map((s) => ({
+      id: s.id,
+      userId: s.userId,
+      username: s.username,
+      profilePicture: s.profilePicture || '',
+      text: s.text,
+      mediaUrl: s.mediaUrl,
+      bgGradient: s.bgGradient,
+      views: JSON.parse(s.views || '[]'),
+      createdAt: s.createdAt.toISOString(),
+    }));
+
+    return res.json({ stories: activeStories });
+  } catch (err) {
+    return res.status(500).json({ message: 'Error fetching status updates.' });
+  }
 };
 
 export const recordStoryViewHandler = async (req: Request, res: Response) => {
@@ -252,12 +327,20 @@ export const recordStoryViewHandler = async (req: Request, res: Response) => {
   const { storyId } = req.params;
 
   try {
-    const story = storiesStore.find((s) => s.id === storyId);
-    if (story) {
-      if (!story.views.includes(userId)) {
-        story.views.push(userId);
+    const dbStory = await prisma.userStory.findUnique({
+      where: { id: storyId },
+    });
+
+    if (dbStory) {
+      const viewsList: string[] = JSON.parse(dbStory.views || '[]');
+      if (!viewsList.includes(userId)) {
+        viewsList.push(userId);
+        await prisma.userStory.update({
+          where: { id: storyId },
+          data: { views: JSON.stringify(viewsList) },
+        });
       }
-      return res.json({ viewsCount: story.views.length, views: story.views });
+      return res.json({ viewsCount: viewsList.length, views: viewsList });
     }
     return res.status(404).json({ message: 'Story not found.' });
   } catch (error) {

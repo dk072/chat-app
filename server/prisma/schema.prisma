@@ -19,6 +19,7 @@ model User {
   status         String         @default("ONLINE") // "ONLINE", "AWAY", "BUSY", "OFFLINE"
   role           String         @default("USER") // "USER" or "ADMIN"
   isBanned       Boolean        @default(false)
+  tokenVersion    Int            @default(1)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
@@ -222,6 +223,38 @@ model ApprovalRequest {
   payload      String   @default("{}")
   status       String   @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
   createdAt    DateTime @default(now())
+}
+
+model UserStory {
+  id             String   @id @default(uuid())
+  userId         String
+  username       String
+  profilePicture String?
+  text           String?
+  mediaUrl       String?
+  bgGradient     String   @default("from-indigo-600 to-purple-600")
+  views          String   @default("[]") // JSON stringified array of user IDs
+  createdAt      DateTime @default(now())
+}
+
+model InChatPoll {
+  id          String   @id @default(uuid())
+  pollId      String   @unique
+  conversationId String
+  question    String
+  options     String   // JSON stringified array of options with votes
+  isAnonymous Boolean  @default(false)
+  createdBy   String
+  createdAt   DateTime @default(now())
+}
+
+model StarredItem {
+  id        String   @id @default(uuid())
+  userId    String
+  messageId String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, messageId])
 }
 
 

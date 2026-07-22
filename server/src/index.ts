@@ -23,6 +23,11 @@ import prisma from './config/db';
 
 dotenv.config();
 
+// Production Security Audit Verification
+if (process.env.NODE_ENV === 'production' && (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'supersecretkey')) {
+  console.error('[SECURITY CRITICAL] Severe Risk: JWT_SECRET is missing or set to default fallback in production mode!');
+}
+
 const app = express();
 const server = http.createServer(app);
 

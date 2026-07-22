@@ -10,14 +10,19 @@ import RegisterCard from './components/auth/RegisterCard';
 import Sidebar from './components/chat/Sidebar';
 import NavigationSidebar from './components/chat/NavigationSidebar';
 import ChatWindow from './components/chat/ChatWindow';
-import SettingsModal from './components/chat/SettingsModal';
 import CallOverlay from './components/call/CallOverlay';
-import AdminDashboard from './pages/admin/AdminDashboard';
 import AnimatedBackground from './components/ui/AnimatedBackground';
 import PageTransition from './components/ui/PageTransition';
 
-import { StarredMessagesDrawer } from './components/chat/StarredMessagesDrawer';
-import { AppLockModal } from './components/chat/AppLockModal';
+// Lazy-loaded heavy components for code-splitting and faster initial page loads
+const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard'));
+const SettingsModal = React.lazy(() => import('./components/chat/SettingsModal'));
+const StarredMessagesDrawer = React.lazy(() =>
+  import('./components/chat/StarredMessagesDrawer').then((m) => ({ default: m.StarredMessagesDrawer }))
+);
+const AppLockModal = React.lazy(() =>
+  import('./components/chat/AppLockModal').then((m) => ({ default: m.AppLockModal }))
+);
 
 const MainLayout: React.FC = () => {
   const { user, loading } = useAuth();
@@ -109,21 +114,29 @@ const MainLayout: React.FC = () => {
         <ChatWindow />
       </div>
 
-      <SettingsModal
-        isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
-        onOpenAdmin={() => window.location.href = '/admin'}
-      />
+      <React.Suspense fallback={null}>
+        {showSettings && (
+          <SettingsModal
+            isOpen={showSettings}
+            onClose={() => setShowSettings(false)}
+            onOpenAdmin={() => (window.location.href = '/admin')}
+          />
+        )}
 
-      <StarredMessagesDrawer
-        isOpen={showStarred}
-        onClose={() => setShowStarred(false)}
-      />
+        {showStarred && (
+          <StarredMessagesDrawer
+            isOpen={showStarred}
+            onClose={() => setShowStarred(false)}
+          />
+        )}
 
-      <AppLockModal
-        isLocked={isAppLocked}
-        onUnlock={() => setIsAppLocked(false)}
-      />
+        {isAppLocked && (
+          <AppLockModal
+            isLocked={isAppLocked}
+            onUnlock={() => setIsAppLocked(false)}
+          />
+        )}
+      </React.Suspense>
 
       <CallOverlay />
     </div>
@@ -134,18 +147,18 @@ const AdminRoute: React.FC = () => {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">Loading...</div>;
+    return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white font-bold animate-pulse">Loading Admin Workspace...</div>;
   }
   
-  if (!user) {
+  if (!user || user.role !== 'ADMIN') {
     return <Navigate to="/" />;
   }
 
-  if (user.role !== 'ADMIN') {
-    return <Navigate to="/" />;
-  }
-
-  return <AdminDashboard />;
+  return (
+    <React.Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-white font-bold animate-pulse">Loading Dashboard Modules...</div>}>
+      <AdminDashboard />
+    </React.Suspense>
+  );
 };
 
 const App: React.FC = () => {
