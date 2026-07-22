@@ -44,6 +44,16 @@ export const StoriesBar: React.FC = () => {
     fetchStories();
   }, []);
 
+  const handleOpenStory = async (story: Story) => {
+    setActiveStory(story);
+    try {
+      const res = await api.post(`/nextgen/stories/${story.id}/view`);
+      if (res.data.views) {
+        setActiveStory((prev) => (prev && prev.id === story.id ? { ...prev, views: res.data.views } : prev));
+      }
+    } catch (e) {}
+  };
+
   const handlePostStory = async () => {
     if (!storyText.trim()) return;
     try {
@@ -85,7 +95,7 @@ export const StoriesBar: React.FC = () => {
         {stories.map((story) => (
           <div
             key={story.id}
-            onClick={() => setActiveStory(story)}
+            onClick={() => handleOpenStory(story)}
             className="flex flex-col items-center space-y-1 cursor-pointer shrink-0 group"
           >
             <div className="p-0.5 rounded-full bg-gradient-to-tr from-amber-500 via-rose-500 to-indigo-500 group-hover:scale-105 transition-transform">
@@ -176,11 +186,15 @@ export const StoriesBar: React.FC = () => {
               {activeStory.text}
             </div>
 
-            {/* Footer View Count */}
-            <div className="flex items-center justify-center space-x-1 text-xs opacity-80 z-10">
-              <Eye className="w-4 h-4" />
-              <span>{activeStory.views.length} views</span>
-            </div>
+            {/* Footer View Count (Only visible to the user who uploaded the status update) */}
+            {activeStory.userId === user?.id ? (
+              <div className="flex items-center justify-center space-x-1.5 text-xs font-semibold z-10 bg-black/30 backdrop-blur-sm py-1.5 px-3.5 rounded-full mx-auto text-white/90">
+                <Eye className="w-4 h-4 text-indigo-300" />
+                <span>{activeStory.views.length} {activeStory.views.length === 1 ? 'view' : 'views'}</span>
+              </div>
+            ) : (
+              <div className="h-6" />
+            )}
           </div>
         </div>,
         document.body

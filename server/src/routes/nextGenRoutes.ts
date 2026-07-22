@@ -12,6 +12,7 @@ import {
   getPollHandler,
   createStoryHandler,
   getStoriesHandler,
+  recordStoryViewHandler,
   setDisappearingTimerHandler,
 } from '../controllers/nextGenController';
 
@@ -37,6 +38,7 @@ router.get('/polls/:pollId', getPollHandler);
 // User Stories & Status Updates
 router.post('/stories', createStoryHandler);
 router.get('/stories', getStoriesHandler);
+router.post('/stories/:storyId/view', recordStoryViewHandler);
 
 // Disappearing Chats Settings
 router.post('/disappearing-timer/:conversationId', setDisappearingTimerHandler);

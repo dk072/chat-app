@@ -246,6 +246,25 @@ export const getStoriesHandler = async (req: Request, res: Response) => {
   return res.json({ stories: activeStories });
 };
 
+export const recordStoryViewHandler = async (req: Request, res: Response) => {
+  const authReq = req as AuthenticatedRequest;
+  const userId = authReq.user!.id;
+  const { storyId } = req.params;
+
+  try {
+    const story = storiesStore.find((s) => s.id === storyId);
+    if (story) {
+      if (!story.views.includes(userId)) {
+        story.views.push(userId);
+      }
+      return res.json({ viewsCount: story.views.length, views: story.views });
+    }
+    return res.status(404).json({ message: 'Story not found.' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error recording story view.' });
+  }
+};
+
 export const setDisappearingTimerHandler = async (req: Request, res: Response) => {
   const { conversationId } = req.params;
   const { timerHours = 24 } = req.body;
