@@ -154,7 +154,49 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const sendMessage = async (content: string | null, type: MessageType, file?: File) => {
-    if (!activeChat) return;
+    if (!activeChat || !user) return;
+
+    const tempId = `temp_${Date.now()}`;
+    const parentMsg = replyingTo
+      ? {
+          id: replyingTo.id,
+          content: replyingTo.content,
+          type: replyingTo.type,
+          senderId: replyingTo.senderId,
+        }
+      : null;
+
+    // Instant Optimistic Message Bubble (0ms UI paint)
+    const optimisticMessage: Message = {
+      id: tempId,
+      conversationId: activeChat.id,
+      senderId: user.id,
+      content,
+      type,
+      fileUrl: file ? URL.createObjectURL(file) : null,
+      fileName: file?.name || null,
+      fileSize: file?.size || null,
+      isDelivered: true,
+      isSeen: false,
+      isEdited: false,
+      isDeletedForEveryone: false,
+      deletedForUsers: [],
+      parentId: replyingTo?.id || null,
+      parentMessage: parentMsg,
+      reactions: {},
+      isPinnedGlobally: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      sender: {
+        id: user.id,
+        username: user.username,
+        profilePicture: user.profilePicture || '',
+      },
+    };
+
+    // Instant local UI update
+    setMessages((prev) => [...prev, optimisticMessage]);
+    setReplyingTo(null);
 
     try {
       const formData = new FormData();
@@ -171,15 +213,17 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         formData.append('parentId', replyingTo.id);
       }
 
-      await api.post('/messages/send', formData, {
+      const res = await api.post('/messages/send', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      // Clear replying banner
-      setReplyingTo(null);
+      // Replace optimistic message with actual persisted message
+      const actualMessage: Message = res.data.message;
+      setMessages((prev) => prev.map((m) => (m.id === tempId ? actualMessage : m)));
     } catch (err) {
-      console.error('Failed to dispatch message:', err);
-      throw err;
+      console.error('Error sending message:', err);
+      // Rollback optimistic message if request fails
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
     }
   };
 

@@ -93,7 +93,7 @@ const VoicePlayer: React.FC<{ url: string }> = ({ url }) => {
   );
 };
 
-export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
+const ChatMessageBubbleComponent: React.FC<ChatMessageBubbleProps> = ({
   message: m,
   isSelf,
   activeChat,
@@ -308,6 +308,8 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
                       <img
                         src={getFullUrl(m.fileUrl)}
                         alt="attachment"
+                        loading="lazy"
+                        decoding="async"
                         className="object-cover w-full max-h-72 hover:scale-[1.01] transition-transform duration-200"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src =
@@ -321,7 +323,7 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
                 {/* Video Render */}
                 {m.type === 'VIDEO' && m.fileUrl && (
                   <div className="rounded-xl overflow-hidden max-w-sm border border-black/10">
-                    <video src={getFullUrl(m.fileUrl)} controls className="w-full max-h-72" />
+                    <video src={getFullUrl(m.fileUrl)} controls preload="metadata" className="w-full max-h-72" />
                   </div>
                 )}
 
@@ -437,5 +439,21 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({
     </motion.div>
   );
 };
+
+export const ChatMessageBubble = React.memo(
+  ChatMessageBubbleComponent,
+  (prevProps, nextProps) =>
+    prevProps.message.id === nextProps.message.id &&
+    prevProps.message.content === nextProps.message.content &&
+    prevProps.message.isSeen === nextProps.message.isSeen &&
+    prevProps.message.isDelivered === nextProps.message.isDelivered &&
+    prevProps.message.isDeletedForEveryone === nextProps.message.isDeletedForEveryone &&
+    prevProps.message.reactions === nextProps.message.reactions &&
+    prevProps.isSelf === nextProps.isSelf &&
+    prevProps.searchText === nextProps.searchText &&
+    (prevProps.bubbleMenuId === prevProps.message.id) === (nextProps.bubbleMenuId === nextProps.message.id) &&
+    (prevProps.editingMessageId === prevProps.message.id) === (nextProps.editingMessageId === nextProps.message.id) &&
+    prevProps.editingText === nextProps.editingText
+);
 
 export default ChatMessageBubble;
