@@ -56,9 +56,12 @@ if (process.env.REDIS_URL) {
 // Setup Socket lifecycle handlers
 initializeSocket(io);
 
-// Real-Time Telemetry Broadcast Loop for Admin Dashboard (every 3 seconds)
+// Real-Time Telemetry Broadcast Loop for Admin Dashboard (Only when admins are active)
 setInterval(async () => {
   try {
+    const adminRoom = io.sockets.adapter.rooms.get('admin_metrics_room');
+    if (!adminRoom || adminRoom.size === 0) return; // Zero CPU/DB overhead when no admin is watching
+
     const onlineUsersCount = await prisma.user.count({ where: { isOnline: true } });
     const activeCalls = getActiveCallsCount();
     const metrics = await getPerformanceMetrics(activeCalls, onlineUsersCount);
@@ -66,7 +69,7 @@ setInterval(async () => {
   } catch (err) {
     // Silent fail in telemetry ticker
   }
-}, 3000);
+}, 5000);
 
 
 // Core Middlewares
