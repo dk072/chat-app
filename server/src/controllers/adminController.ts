@@ -10,6 +10,7 @@ export const getStats = async (req: Request, res: Response) => {
     const totalUsers = await prisma.user.count();
     const totalMessages = await prisma.message.count();
     const pendingReports = await prisma.report.count({ where: { status: 'PENDING' } });
+    const onlineUsers = await prisma.user.count({ where: { isOnline: true } });
 
     // Active users online now or active within last 24 hours
     const activePeriod = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -47,6 +48,7 @@ export const getStats = async (req: Request, res: Response) => {
         totalUsers,
         totalMessages,
         activeUsers,
+        onlineUsers,
         pendingReports,
         messageBreakdown: messageTypes.map((item) => ({
           type: item.type,

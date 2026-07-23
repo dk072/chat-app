@@ -90,6 +90,7 @@ export interface AdminStats {
   totalUsers: number;
   totalMessages: number;
   activeUsers: number;
+  onlineUsers?: number;
   pendingReports: number;
   messageBreakdown: {
     type: MessageType;

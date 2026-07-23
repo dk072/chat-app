@@ -66,11 +66,15 @@ const Dashboard: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterOnlineOnly, setFilterOnlineOnly] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [adminSocket, setAdminSocket] = useState<any>(null);
   const [systemToast, setSystemToast] = useState<{ title: string; message: string } | null>(null);
+
+  const realTimeOnlineCount = stats?.onlineUsers ?? users.filter((u) => u.isOnline).length;
+  const displayedUsers = users.filter((u) => !filterOnlineOnly || u.isOnline);
   
   // Password Visibility & Reset Modal State
   const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
@@ -128,9 +132,24 @@ const Dashboard: React.FC = () => {
       setTimeout(() => setSystemToast(null), 8000);
     });
 
+    // Real-Time User Connection Status Listener
+    socketInstance.on('user_status', ({ userId, isOnline, lastSeen }: { userId: string; isOnline: boolean; lastSeen?: string }) => {
+      setUsers((prevUsers) =>
+        prevUsers.map((u) => (u.id === userId ? { ...u, isOnline, lastSeen: lastSeen || u.lastSeen } : u))
+      );
+      setStats((prevStats) => {
+        if (!prevStats) return null;
+        const currentOnline = prevStats.onlineUsers ?? 0;
+        const updatedOnline = isOnline ? currentOnline + 1 : Math.max(currentOnline - 1, 0);
+        return { ...prevStats, onlineUsers: updatedOnline };
+      });
+    });
+
     setAdminSocket(socketInstance);
 
     return () => {
+      socketInstance.off('system_announcement');
+      socketInstance.off('user_status');
       socketInstance.disconnect();
     };
   }, []);
@@ -470,6 +489,23 @@ const Dashboard: React.FC = () => {
                 <p className="text-lg sm:text-2xl font-bold text-slate-800">{stats.totalUsers}</p>
               </div>
             </div>
+
+            <div className="bg-white p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xs border border-emerald-100 flex items-center space-x-3 sm:space-x-4 relative">
+              <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-emerald-50 text-emerald-600 shrink-0 relative">
+                <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-slate-500 font-medium truncate">Real-Time Online</p>
+                <p className="text-lg sm:text-2xl font-extrabold text-emerald-600">
+                  {realTimeOnlineCount}
+                </p>
+              </div>
+            </div>
+
             <div className="bg-white p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xs border border-slate-100 flex items-center space-x-3 sm:space-x-4">
               <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-indigo-50 text-indigo-500 shrink-0">
                 <BarChart2 className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -479,15 +515,7 @@ const Dashboard: React.FC = () => {
                 <p className="text-lg sm:text-2xl font-bold text-slate-800">{stats.totalMessages}</p>
               </div>
             </div>
-            <div className="bg-white p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xs border border-slate-100 flex items-center space-x-3 sm:space-x-4">
-              <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-emerald-50 text-emerald-500 shrink-0">
-                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-slate-500 font-medium truncate">Active Today</p>
-                <p className="text-lg sm:text-2xl font-bold text-slate-800">{stats.activeUsers}</p>
-              </div>
-            </div>
+
             <div className="bg-white p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xs border border-slate-100 flex items-center space-x-3 sm:space-x-4">
               <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-rose-50 text-rose-500 shrink-0">
                 <AlertOctagon className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -506,7 +534,20 @@ const Dashboard: React.FC = () => {
           {activeTab === 'users' && (
             <div>
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
-                <h2 className="text-lg font-bold text-slate-800">User Management</h2>
+                <div className="flex items-center space-x-3">
+                  <h2 className="text-lg font-bold text-slate-800">User Management</h2>
+                  <button
+                    onClick={() => setFilterOnlineOnly(!filterOnlineOnly)}
+                    className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+                      filterOnlineOnly
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                    }`}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${filterOnlineOnly ? 'bg-white animate-pulse' : 'bg-emerald-500'}`} />
+                    <span>{filterOnlineOnly ? 'Showing Online Only' : `Online (${users.filter(u => u.isOnline).length})`}</span>
+                  </button>
+                </div>
                 <div className="relative w-full sm:w-64">
                   <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
                   <input
@@ -521,22 +562,33 @@ const Dashboard: React.FC = () => {
 
               {/* Mobile Card Layout for Users */}
               <div className="md:hidden space-y-3">
-                {users.map((u) => (
+                {displayedUsers.map((u) => (
                   <div key={u.id} className="p-4 bg-slate-50/70 border border-slate-200/80 rounded-2xl space-y-3">
                     <div className="flex justify-between items-start">
                       <div>
-                        <div className="font-bold text-slate-800 text-sm">{u.username}</div>
+                        <div className="font-bold text-slate-800 text-sm flex items-center space-x-1.5">
+                          <span>{u.username}</span>
+                          {u.isOnline && (
+                            <span className="flex h-2 w-2 relative">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            </span>
+                          )}
+                        </div>
                         <div className="text-xs text-slate-500">{u.email}</div>
                       </div>
                       <div className="flex items-center space-x-1.5">
+                        {u.isOnline ? (
+                          <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-lg text-[10px] font-bold flex items-center space-x-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <span>ONLINE</span>
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 bg-slate-200 text-slate-600 rounded-lg text-[10px] font-medium">OFFLINE</span>
+                        )}
                         <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${u.role === 'ADMIN' ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-700'}`}>
                           {u.role}
                         </span>
-                        {u.isBanned ? (
-                          <span className="px-2 py-0.5 bg-rose-100 text-rose-700 rounded-lg text-[10px] font-bold">Banned</span>
-                        ) : (
-                          <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-lg text-[10px] font-bold">Active</span>
-                        )}
                       </div>
                     </div>
 
@@ -615,14 +667,22 @@ const Dashboard: React.FC = () => {
                       <th className="pb-4 font-medium">Password / Hash</th>
                       <th className="pb-4 font-medium">Joined</th>
                       <th className="pb-4 font-medium">Role</th>
-                      <th className="pb-4 font-medium">Status</th>
+                      <th className="pb-4 font-medium">Status / Presence</th>
                       <th className="pb-4 font-medium text-right pr-4">Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((u) => (
+                    {displayedUsers.map((u) => (
                       <tr key={u.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-                        <td className="py-4 pl-4 font-medium text-slate-800">{u.username}</td>
+                        <td className="py-4 pl-4 font-medium text-slate-800 flex items-center space-x-2">
+                          <span>{u.username}</span>
+                          {u.isOnline && (
+                            <span className="flex h-2 w-2 relative">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            </span>
+                          )}
+                        </td>
                         <td className="py-4 text-slate-500 text-sm">{u.email}</td>
                         <td className="py-4 text-slate-600 text-xs">
                           <div className="flex items-center space-x-2">
@@ -667,11 +727,22 @@ const Dashboard: React.FC = () => {
                           </span>
                         </td>
                         <td className="py-4">
-                          {u.isBanned ? (
-                            <span className="text-rose-500 text-sm font-medium">Banned</span>
-                          ) : (
-                            <span className="text-emerald-500 text-sm font-medium">Active</span>
-                          )}
+                          <div className="flex items-center space-x-2">
+                            {u.isOnline ? (
+                              <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold inline-flex items-center space-x-1.5">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                <span>Online</span>
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-1 bg-slate-100 text-slate-500 rounded-lg text-xs font-medium inline-flex items-center space-x-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                                <span>Offline</span>
+                              </span>
+                            )}
+                            {u.isBanned && (
+                              <span className="px-2 py-0.5 bg-rose-50 text-rose-600 rounded-lg text-[10px] font-bold">Banned</span>
+                            )}
+                          </div>
                         </td>
                         <td className="py-4 text-right pr-4">
                           {u.role !== 'ADMIN' && (
