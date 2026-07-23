@@ -13,6 +13,7 @@ import ChatWindow from './components/chat/ChatWindow';
 import CallOverlay from './components/call/CallOverlay';
 import AnimatedBackground from './components/ui/AnimatedBackground';
 import PageTransition from './components/ui/PageTransition';
+import { CallSidebar } from './components/chat/CallSidebar';
 
 // Lazy-loaded heavy components for code-splitting and faster initial page loads
 const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard'));
@@ -102,6 +103,8 @@ const MainLayout: React.FC = () => {
       <div className={`flex-1 md:flex-none md:h-full shrink-0 w-full md:w-64 lg:w-80 glass-panel border-r border-slate-200/20 dark:border-white/5 overflow-hidden ${activeChat ? 'hidden md:block' : 'block'}`}>
         {activeNavView === 'chats' ? (
           <Sidebar />
+        ) : activeNavView === 'calls' ? (
+          <CallSidebar />
         ) : (
           <div className="flex-1 h-full flex items-center justify-center text-slate-400">
             Coming soon...
