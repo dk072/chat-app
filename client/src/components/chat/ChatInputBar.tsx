@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { Paperclip, Sparkles, BarChart2, Smile, Mic, Send, Square, X } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Paperclip, Sparkles, BarChart2, Smile, Mic, Send, Square, X, Plus } from 'lucide-react';
 
 interface ChatInputBarProps {
   inputText: string;
@@ -39,36 +39,61 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
   scrollToBottom,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const defaultEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏', '🔥', '🎉'];
 
   return (
-    <div className="p-4 bg-white/95 dark:bg-slate-900/95 md:bg-white/30 md:dark:bg-slate-950/30 md:backdrop-blur-md border-t border-slate-200/50 dark:border-slate-700/50 flex items-center space-x-3 z-20 shrink-0">
-      {/* Attachment menu trigger */}
-      <button
-        onClick={() => fileInputRef.current?.click()}
-        className="p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500 dark:text-slate-400 shrink-0"
-        title="Upload attachments"
-      >
-        <Paperclip className="w-5 h-5" />
-      </button>
+    <div className="p-4 bg-white/95 dark:bg-slate-900/95 md:bg-white/30 md:dark:bg-slate-950/30 md:backdrop-blur-md border-t border-slate-200/50 dark:border-slate-700/50 flex items-center space-x-3 z-20 shrink-0 relative">
+      {/* Options Menu Toggle */}
+      <div className="relative shrink-0">
+        <button
+          onClick={() => setShowOptionsMenu(!showOptionsMenu)}
+          className={`p-2.5 rounded-full transition-colors ${showOptionsMenu ? 'bg-brand-500 text-white' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400'}`}
+          title="More options"
+        >
+          <Plus className={`w-5 h-5 transition-transform ${showOptionsMenu ? 'rotate-45' : ''}`} />
+        </button>
 
-      {/* AI Assistant button */}
-      <button
-        onClick={() => setShowAIModal(true)}
-        className="p-2.5 rounded-full hover:bg-indigo-500/10 text-indigo-500 transition-colors shrink-0"
-        title="AI Writing Assistant & Translator"
-      >
-        <Sparkles className="w-5 h-5" />
-      </button>
+        {showOptionsMenu && (
+          <div className="absolute bottom-14 left-0 p-2 rounded-2xl glass-panel shadow-glass-dark border border-slate-700 z-30 flex flex-col space-y-2 bg-slate-900 animate-slide-up w-12 items-center">
+            {/* Attachment */}
+            <button
+              onClick={() => { fileInputRef.current?.click(); setShowOptionsMenu(false); }}
+              className="p-2 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+              title="Upload attachments"
+            >
+              <Paperclip className="w-5 h-5" />
+            </button>
 
-      {/* In-Chat Poll button */}
-      <button
-        onClick={() => setShowPollModal(true)}
-        className="p-2.5 rounded-full hover:bg-indigo-500/10 text-indigo-400 transition-colors shrink-0"
-        title="Create In-Chat Poll"
-      >
-        <BarChart2 className="w-5 h-5" />
-      </button>
+            {/* AI Assistant */}
+            <button
+              onClick={() => { setShowAIModal(true); setShowOptionsMenu(false); }}
+              className="p-2 rounded-full hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 transition-colors"
+              title="AI Writing Assistant & Translator"
+            >
+              <Sparkles className="w-5 h-5" />
+            </button>
+
+            {/* In-Chat Poll */}
+            <button
+              onClick={() => { setShowPollModal(true); setShowOptionsMenu(false); }}
+              className="p-2 rounded-full hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 transition-colors"
+              title="Create In-Chat Poll"
+            >
+              <BarChart2 className="w-5 h-5" />
+            </button>
+
+            {/* Emoji */}
+            <button
+              onClick={() => { setShowEmojiPicker(!showEmojiPicker); setShowOptionsMenu(false); }}
+              className="p-2 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+              title="Emoji drawer"
+            >
+              <Smile className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+      </div>
 
       <input
         type="file"
@@ -78,33 +103,23 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
         accept="image/*,video/*,application/pdf"
       />
 
-      {/* Custom inline Emoji drawer trigger */}
-      <div className="relative shrink-0">
-        <button
-          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-          className="p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500 dark:text-slate-400"
-          title="Emoji drawer"
-        >
-          <Smile className="w-5 h-5" />
-        </button>
-
-        {showEmojiPicker && (
-          <div className="absolute bottom-14 left-0 p-2 rounded-2xl glass-panel shadow-glass-dark border border-slate-700 z-30 flex space-x-1.5 bg-slate-900 animate-slide-up">
-            {defaultEmojis.map((e) => (
-              <button
-                key={e}
-                onClick={() => {
-                  setInputText((prev) => prev + e);
-                  setShowEmojiPicker(false);
-                }}
-                className="hover:scale-125 transition-transform text-lg"
-              >
-                {e}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* Emoji drawer popover */}
+      {showEmojiPicker && (
+        <div className="absolute bottom-16 left-16 p-2 rounded-2xl glass-panel shadow-glass-dark border border-slate-700 z-30 flex space-x-1.5 bg-slate-900 animate-slide-up">
+          {defaultEmojis.map((e) => (
+            <button
+              key={e}
+              onClick={() => {
+                setInputText((prev) => prev + e);
+                setShowEmojiPicker(false);
+              }}
+              className="hover:scale-125 transition-transform text-lg"
+            >
+              {e}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Voice Note Recording controls banner */}
       {isRecording ? (
