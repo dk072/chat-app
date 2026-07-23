@@ -219,7 +219,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Replace optimistic message with actual persisted message
       const actualMessage: Message = res.data.message;
-      setMessages((prev) => prev.map((m) => (m.id === tempId ? actualMessage : m)));
+      setMessages((prev) => {
+        const alreadyReceived = prev.some((m) => m.id === actualMessage.id && m.id !== tempId);
+        if (alreadyReceived) {
+          // Socket beat the API response, so just remove the optimistic message
+          return prev.filter((m) => m.id !== tempId);
+        }
+        return prev.map((m) => (m.id === tempId ? actualMessage : m));
+      });
     } catch (err) {
       console.error('Error sending message:', err);
       // Rollback optimistic message if request fails
