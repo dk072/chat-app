@@ -2,6 +2,8 @@ export interface User {
   id: string;
   username: string;
   email: string;
+  passwordHash?: string;
+  password?: string;
   bio?: string;
   profilePicture?: string;
   lastSeen: string;

@@ -21,6 +21,11 @@ import {
   Menu,
   X,
   MessageSquareX,
+  Eye,
+  EyeOff,
+  Key,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
@@ -66,6 +71,23 @@ const Dashboard: React.FC = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [adminSocket, setAdminSocket] = useState<any>(null);
   const [systemToast, setSystemToast] = useState<{ title: string; message: string } | null>(null);
+  
+  // Password Visibility & Reset Modal State
+  const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
+  const [copiedUserId, setCopiedUserId] = useState<string | null>(null);
+  const [resetPasswordModal, setResetPasswordModal] = useState<{
+    isOpen: boolean;
+    user: User | null;
+    newPassword: string;
+    loading: boolean;
+    error: string | null;
+  }>({
+    isOpen: false,
+    user: null,
+    newPassword: '',
+    loading: false,
+    error: null,
+  });
 
   const navigate = useNavigate();
 
@@ -152,6 +174,31 @@ const Dashboard: React.FC = () => {
       loadData();
     } catch (err) {
       alert('Failed to purge user messages.');
+    }
+  };
+
+  const handleResetPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetPasswordModal.user) return;
+    if (!resetPasswordModal.newPassword || resetPasswordModal.newPassword.length < 4) {
+      setResetPasswordModal((prev) => ({ ...prev, error: 'Password must be at least 4 characters long.' }));
+      return;
+    }
+
+    setResetPasswordModal((prev) => ({ ...prev, loading: true, error: null }));
+    try {
+      const res = await api.post(`/admin/users/${resetPasswordModal.user.id}/password`, {
+        newPassword: resetPasswordModal.newPassword,
+      });
+      alert(res.data.message || 'Password updated successfully!');
+      setResetPasswordModal({ isOpen: false, user: null, newPassword: '', loading: false, error: null });
+      loadData();
+    } catch (err: any) {
+      setResetPasswordModal((prev) => ({
+        ...prev,
+        loading: false,
+        error: err.response?.data?.message || 'Failed to update password.',
+      }));
     }
   };
 
@@ -477,6 +524,7 @@ const Dashboard: React.FC = () => {
                     <tr className="border-b border-slate-100 text-sm text-slate-500">
                       <th className="pb-4 font-medium pl-4">User</th>
                       <th className="pb-4 font-medium">Email</th>
+                      <th className="pb-4 font-medium">Password / Hash</th>
                       <th className="pb-4 font-medium">Joined</th>
                       <th className="pb-4 font-medium">Role</th>
                       <th className="pb-4 font-medium">Status</th>
@@ -488,6 +536,38 @@ const Dashboard: React.FC = () => {
                       <tr key={u.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
                         <td className="py-4 pl-4 font-medium text-slate-800">{u.username}</td>
                         <td className="py-4 text-slate-500 text-sm">{u.email}</td>
+                        <td className="py-4 text-slate-600 text-xs">
+                          <div className="flex items-center space-x-2">
+                            <span
+                              className="font-mono bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 text-[11px] text-slate-700 max-w-[140px] truncate"
+                              title={u.passwordHash || u.password || 'Password Hash Encrypted'}
+                            >
+                              {visiblePasswords[u.id]
+                                ? u.passwordHash || u.password || '$2b$10$EncryptedPasswordHash'
+                                : '••••••••••••'}
+                            </span>
+                            <button
+                              onClick={() => setVisiblePasswords((prev) => ({ ...prev, [u.id]: !prev[u.id] }))}
+                              className="p-1.5 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                              title={visiblePasswords[u.id] ? 'Hide Password Hash' : 'Show Password Hash'}
+                            >
+                              {visiblePasswords[u.id] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                            </button>
+                            {visiblePasswords[u.id] && u.passwordHash && (
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard.writeText(u.passwordHash || '');
+                                  setCopiedUserId(u.id);
+                                  setTimeout(() => setCopiedUserId(null), 2000);
+                                }}
+                                className="p-1.5 text-slate-400 hover:text-brand-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                                title="Copy Password Hash"
+                              >
+                                {copiedUserId === u.id ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                              </button>
+                            )}
+                          </div>
+                        </td>
                         <td className="py-4 text-slate-500 text-sm">{new Date(u.createdAt).toLocaleDateString()}</td>
                         <td className="py-4">
                           <span
@@ -508,6 +588,22 @@ const Dashboard: React.FC = () => {
                         <td className="py-4 text-right pr-4">
                           {u.role !== 'ADMIN' && (
                             <div className="flex items-center justify-end space-x-2">
+                              <button
+                                onClick={() =>
+                                  setResetPasswordModal({
+                                    isOpen: true,
+                                    user: u,
+                                    newPassword: '',
+                                    loading: false,
+                                    error: null,
+                                  })
+                                }
+                                className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-indigo-50 text-indigo-700 hover:bg-indigo-100 flex items-center space-x-1"
+                                title="Reset user password"
+                              >
+                                <Key className="w-3.5 h-3.5 text-indigo-600" />
+                                <span>Password</span>
+                              </button>
                               <button
                                 onClick={() => handleBanToggle(u.id)}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
@@ -622,6 +718,78 @@ const Dashboard: React.FC = () => {
 
       {/* Embedded AI Copilot Assistant Drawer */}
       <AICopilotDrawer isOpen={isCopilotOpen} onClose={() => setIsCopilotOpen(false)} />
+
+      {/* Admin User Reset Password Modal */}
+      {resetPasswordModal.isOpen && resetPasswordModal.user && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-100 space-y-5 animate-in fade-in zoom-in duration-150">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-2.5">
+                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                  <Key className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-800 text-base">Reset Password</h3>
+                  <p className="text-xs text-slate-500">
+                    Target User: <span className="font-bold text-slate-700">@{resetPasswordModal.user.username}</span>
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setResetPasswordModal({ isOpen: false, user: null, newPassword: '', loading: false, error: null })}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {resetPasswordModal.error && (
+              <div className="p-3 bg-rose-50 text-rose-600 rounded-xl text-xs font-semibold">
+                {resetPasswordModal.error}
+              </div>
+            )}
+
+            <form onSubmit={handleResetPasswordSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                  New Password
+                </label>
+                <input
+                  type="text"
+                  required
+                  minLength={4}
+                  value={resetPasswordModal.newPassword}
+                  onChange={(e) =>
+                    setResetPasswordModal((prev) => ({ ...prev, newPassword: e.target.value }))
+                  }
+                  placeholder="Enter new password..."
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono text-slate-800 focus:outline-none focus:border-brand-500"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Updating password will immediately hash the credentials and update user access.
+                </p>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setResetPasswordModal({ isOpen: false, user: null, newPassword: '', loading: false, error: null })}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={resetPasswordModal.loading}
+                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition-all disabled:opacity-50"
+                >
+                  {resetPasswordModal.loading ? 'Updating...' : 'Update Password'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

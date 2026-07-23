@@ -79,6 +79,7 @@ export const listUsers = async (req: Request, res: Response) => {
         id: true,
         username: true,
         email: true,
+        passwordHash: true,
         role: true,
         isBanned: true,
         createdAt: true,
@@ -92,6 +93,48 @@ export const listUsers = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('List users admin controller error:', error);
     return res.status(500).json({ message: 'Internal server error fetching users list.' });
+  }
+};
+
+/**
+ * Resets a user's password directly from the admin panel.
+ */
+export const resetUserPassword = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const { newPassword } = req.body;
+
+  if (!newPassword || newPassword.length < 4) {
+    return res.status(400).json({ message: 'New password must be at least 4 characters long.' });
+  }
+
+  try {
+    const bcrypt = await import('bcrypt');
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        passwordHash: newPasswordHash,
+        tokenVersion: { increment: 1 },
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        passwordHash: true,
+        role: true,
+        isBanned: true,
+        createdAt: true,
+      },
+    });
+
+    return res.json({
+      message: `Password updated successfully for ${updatedUser.username}`,
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error('Reset user password admin controller error:', error);
+    return res.status(500).json({ message: 'Internal server error updating password.' });
   }
 };
 
