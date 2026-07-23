@@ -253,7 +253,7 @@ export const getPollHandler = async (req: Request, res: Response) => {
 export const createStoryHandler = async (req: Request, res: Response) => {
   const authReq = req as AuthenticatedRequest;
   const user = authReq.user!;
-  const { text, bgGradient = 'from-indigo-600 to-purple-600', mediaUrl } = req.body;
+  const { text, bgGradient = 'from-indigo-600 to-purple-600', mediaUrl, musicUrl, musicName } = req.body;
 
   try {
     const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
@@ -265,6 +265,8 @@ export const createStoryHandler = async (req: Request, res: Response) => {
         profilePicture: dbUser?.profilePicture || '',
         text,
         mediaUrl,
+        musicUrl,
+        musicName,
         bgGradient,
         views: JSON.stringify([]),
       },
@@ -277,6 +279,8 @@ export const createStoryHandler = async (req: Request, res: Response) => {
       profilePicture: createdStory.profilePicture || '',
       text: createdStory.text,
       mediaUrl: createdStory.mediaUrl,
+      musicUrl: createdStory.musicUrl,
+      musicName: createdStory.musicName,
       bgGradient: createdStory.bgGradient,
       views: [],
       createdAt: createdStory.createdAt.toISOString(),
@@ -310,6 +314,8 @@ export const getStoriesHandler = async (req: Request, res: Response) => {
       profilePicture: s.profilePicture || '',
       text: s.text,
       mediaUrl: s.mediaUrl,
+      musicUrl: s.musicUrl,
+      musicName: s.musicName,
       bgGradient: s.bgGradient,
       views: JSON.parse(s.views || '[]'),
       createdAt: s.createdAt.toISOString(),

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { Plus, X, Eye, Sparkles, Image, Trash2 } from 'lucide-react';
+import { Plus, X, Eye, Sparkles, Image, Trash2, Music } from 'lucide-react';
 import api from '../../services/api';
 import AnimatedAvatar from '../ui/AnimatedAvatar';
 import { useAuth } from '../../context/AuthContext';
@@ -12,6 +12,8 @@ interface Story {
   profilePicture: string;
   text?: string;
   mediaUrl?: string;
+  musicUrl?: string;
+  musicName?: string;
   bgGradient: string;
   views: string[];
   createdAt: string;
@@ -25,7 +27,10 @@ export const StoriesBar: React.FC = () => {
   const [storyText, setStoryText] = useState('');
   const [selectedGradient, setSelectedGradient] = useState('from-indigo-600 to-purple-600');
   const [bgImage, setBgImage] = useState<string | null>(null);
+  const [bgMusic, setBgMusic] = useState<string | null>(null);
+  const [musicName, setMusicName] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const musicInputRef = useRef<HTMLInputElement>(null);
 
   const gradients = [
     'from-indigo-600 to-purple-600',
@@ -97,17 +102,37 @@ export const StoriesBar: React.FC = () => {
     }
   };
 
+  const handleMusicSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert("Audio file is too large. Please select a file under 5MB.");
+        return;
+      }
+      setMusicName(file.name);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setBgMusic(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handlePostStory = async () => {
-    if (!storyText.trim() && !bgImage) return;
+    if (!storyText.trim() && !bgImage && !bgMusic) return;
     try {
       await api.post('/nextgen/stories', {
         text: storyText.trim(),
         bgGradient: selectedGradient,
         mediaUrl: bgImage || undefined,
+        musicUrl: bgMusic || undefined,
+        musicName: musicName || undefined,
       });
       setShowCreateModal(false);
       setStoryText('');
       setBgImage(null);
+      setBgMusic(null);
+      setMusicName(null);
       fetchStories();
     } catch (e) {
       alert('Error posting story');
@@ -221,6 +246,36 @@ export const StoriesBar: React.FC = () => {
                 )}
               </div>
 
+              {/* Music Selector Controls */}
+              <div className="flex justify-between items-center mt-2">
+                <button
+                  onClick={() => musicInputRef.current?.click()}
+                  type="button"
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center space-x-1.5 border border-slate-700 transition-colors"
+                >
+                  <Music className="w-4 h-4 text-pink-400 shrink-0" />
+                  <span className="truncate max-w-[120px]">{musicName ? musicName : 'Add Background Music'}</span>
+                </button>
+                <input
+                  type="file"
+                  ref={musicInputRef}
+                  onChange={handleMusicSelect}
+                  accept="audio/*"
+                  className="hidden"
+                />
+
+                {bgMusic && (
+                  <button
+                    onClick={() => { setBgMusic(null); setMusicName(null); }}
+                    type="button"
+                    className="text-[11px] font-bold text-rose-400 hover:text-rose-300 flex items-center space-x-1"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Remove Music</span>
+                  </button>
+                )}
+              </div>
+
               {/* Color Gradient Presets */}
               <div className="flex justify-center space-x-2 pt-1">
                 {gradients.map((grad, i) => (
@@ -237,7 +292,7 @@ export const StoriesBar: React.FC = () => {
 
             <button
               onClick={handlePostStory}
-              disabled={!storyText.trim() && !bgImage}
+              disabled={!storyText.trim() && !bgImage && !bgMusic}
               className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all"
             >
               Share Status Update
@@ -263,6 +318,11 @@ export const StoriesBar: React.FC = () => {
                 />
                 <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" />
               </>
+            )}
+
+            {/* Audio Player if attached */}
+            {activeStory.musicUrl && (
+              <audio src={activeStory.musicUrl} autoPlay loop className="hidden" />
             )}
 
             {/* Top Bar */}
@@ -298,19 +358,32 @@ export const StoriesBar: React.FC = () => {
             </div>
 
             {/* Story Text */}
-            <div className="text-center font-extrabold text-xl leading-relaxed my-auto drop-shadow-md">
+            <div className="text-center font-extrabold text-xl leading-relaxed my-auto drop-shadow-md z-10">
               {activeStory.text}
             </div>
 
-            {/* Footer View Count (Only visible to the user who uploaded the status update) */}
-            {activeStory.userId === user?.id ? (
-              <div className="flex items-center justify-center space-x-1.5 text-xs font-semibold z-10 bg-black/30 backdrop-blur-sm py-1.5 px-3.5 rounded-full mx-auto text-white/90">
-                <Eye className="w-4 h-4 text-indigo-300" />
-                <span>{activeStory.views.length} {activeStory.views.length === 1 ? 'view' : 'views'}</span>
-              </div>
-            ) : (
-              <div className="h-6" />
-            )}
+            {/* Footer View Count and Music */}
+            <div className="z-10 flex flex-col items-center space-y-2 mt-auto">
+              {activeStory.musicName && (
+                <div className="flex items-center space-x-2 bg-black/40 backdrop-blur-sm py-1 px-3 rounded-full overflow-hidden max-w-[200px]">
+                  <Music className="w-3 h-3 text-pink-400 shrink-0" />
+                  <div className="w-full overflow-hidden">
+                    <p className="text-[10px] font-medium text-white/90 truncate animate-pulse">
+                      {activeStory.musicName}
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {activeStory.userId === user?.id ? (
+                <div className="flex items-center justify-center space-x-1.5 text-xs font-semibold bg-black/30 backdrop-blur-sm py-1.5 px-3.5 rounded-full mx-auto text-white/90">
+                  <Eye className="w-4 h-4 text-indigo-300" />
+                  <span>{activeStory.views.length} {activeStory.views.length === 1 ? 'view' : 'views'}</span>
+                </div>
+              ) : (
+                <div className="h-6" />
+              )}
+            </div>
           </div>
         </div>,
         document.body
