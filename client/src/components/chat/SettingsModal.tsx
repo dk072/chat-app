@@ -26,6 +26,46 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onOpenAd
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Panic Mode Preferences
+  const [panicEnabled, setPanicEnabled] = useState<boolean>(() => {
+    return localStorage.getItem('panic_enabled') !== 'false';
+  });
+  const [panicHoldDuration, setPanicHoldDuration] = useState<number>(() => {
+    return parseInt(localStorage.getItem('panic_hold_duration') || '3', 10);
+  });
+  const [panicRequirePassword, setPanicRequirePassword] = useState<boolean>(() => {
+    return localStorage.getItem('panic_require_password') === 'true';
+  });
+  const [panicDeleteMode, setPanicDeleteMode] = useState<'LOCAL_AND_CLOUD' | 'LOCAL_ONLY'>(() => {
+    return (localStorage.getItem('panic_delete_mode') as any) || 'LOCAL_AND_CLOUD';
+  });
+
+  const togglePanicEnabled = () => {
+    const next = !panicEnabled;
+    setPanicEnabled(next);
+    localStorage.setItem('panic_enabled', String(next));
+    window.dispatchEvent(new Event('storage'));
+  };
+
+  const handleHoldDurationChange = (val: number) => {
+    setPanicHoldDuration(val);
+    localStorage.setItem('panic_hold_duration', String(val));
+    window.dispatchEvent(new Event('storage'));
+  };
+
+  const togglePanicPassword = () => {
+    const next = !panicRequirePassword;
+    setPanicRequirePassword(next);
+    localStorage.setItem('panic_require_password', String(next));
+    window.dispatchEvent(new Event('storage'));
+  };
+
+  const handleDeleteModeChange = (mode: 'LOCAL_AND_CLOUD' | 'LOCAL_ONLY') => {
+    setPanicDeleteMode(mode);
+    localStorage.setItem('panic_delete_mode', mode);
+    window.dispatchEvent(new Event('storage'));
+  };
+
   if (!isOpen || !user) return null;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -245,6 +285,80 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onOpenAd
                   />
                 ))}
               </div>
+            </div>
+          </div>
+
+          <hr className="border-chat-border-light dark:border-chat-border-dark" />
+
+          {/* Emergency Delete (Panic Mode) Settings */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-rose-500 flex items-center space-x-2">
+              <ShieldAlert className="w-4 h-4" />
+              <span>Emergency Delete (Panic Mode)</span>
+            </h3>
+
+            <div className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/20 space-y-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <span className="text-xs font-bold text-slate-800 dark:text-white block">Enable Panic Button</span>
+                  <span className="text-[11px] text-slate-500">Show floating red emergency delete button</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={togglePanicEnabled}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold text-white transition-all cursor-pointer ${
+                    panicEnabled ? 'bg-rose-600' : 'bg-slate-400'
+                  }`}
+                >
+                  {panicEnabled ? 'ENABLED' : 'DISABLED'}
+                </button>
+              </div>
+
+              {panicEnabled && (
+                <>
+                  <div className="flex justify-between items-center pt-2 border-t border-rose-500/10">
+                    <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Hold Duration</span>
+                    <select
+                      value={panicHoldDuration}
+                      onChange={(e) => handleHoldDurationChange(Number(e.target.value))}
+                      className="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none"
+                    >
+                      <option value={1}>1 Second</option>
+                      <option value={2}>2 Seconds</option>
+                      <option value={3}>3 Seconds (Default)</option>
+                      <option value={5}>5 Seconds</option>
+                    </select>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-2 border-t border-rose-500/10">
+                    <div>
+                      <span className="text-xs font-medium text-slate-700 dark:text-slate-300 block">Password Confirmation</span>
+                      <span className="text-[10px] text-slate-500">Require account password before purge</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={togglePanicPassword}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        panicRequirePassword ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                      }`}
+                    >
+                      {panicRequirePassword ? 'ON' : 'OFF'}
+                    </button>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-2 border-t border-rose-500/10">
+                    <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Purge Scope</span>
+                    <select
+                      value={panicDeleteMode}
+                      onChange={(e) => handleDeleteModeChange(e.target.value as any)}
+                      className="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none"
+                    >
+                      <option value="LOCAL_AND_CLOUD">Local + Cloud Data</option>
+                      <option value="LOCAL_ONLY">Local Device Only</option>
+                    </select>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

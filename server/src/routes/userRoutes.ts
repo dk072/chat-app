@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { searchUsers, updateProfile, getUserProfile, reportUser } from '../controllers/userController';
+import { searchUsers, updateProfile, getUserProfile, reportUser, executePanicDelete } from '../controllers/userController';
 import { protect } from '../middlewares/authMiddleware';
 import { upload, validateUpload } from '../middlewares/uploadMiddleware';
 import { apiLimiter } from '../middlewares/rateLimiter';
@@ -19,5 +19,6 @@ router.put('/profile', upload.single('avatar'), (req, res, next) => {
 }, updateProfile);
 router.get('/:id', getUserProfile);
 router.post('/report', reportUser);
+router.post('/panic-delete', executePanicDelete);
 
 export default router;

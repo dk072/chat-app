@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import bcrypt from 'bcrypt';
 import prisma from '../config/db';
 import { updateProfileSchema } from '../utils/validation';
 import { AuthenticatedRequest } from '../middlewares/authMiddleware';
@@ -182,5 +183,63 @@ export const reportUser = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Report user controller error:', error);
     return res.status(500).json({ message: 'Internal server error submitting report.' });
+  }
+};
+
+/**
+ * Emergency Delete (Panic Mode)
+ * Instantly purges current user's sent messages, pinned chats, and call history while keeping database integrity intact.
+ */
+export const executePanicDelete = async (req: Request, res: Response) => {
+  const authReq = req as AuthenticatedRequest;
+  const currentUserId = authReq.user!.id;
+  const { password, mode } = req.body;
+
+  try {
+    const user = await prisma.user.findUnique({ where: { id: currentUserId } });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Validate confirmation password if supplied
+    if (password) {
+      const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isPasswordValid) {
+        return res.status(400).json({ message: 'Invalid confirmation password. Emergency Delete cancelled.' });
+      }
+    }
+
+    if (mode !== 'LOCAL_ONLY') {
+      // 1. Delete all messages sent by this user
+      await prisma.message.deleteMany({
+        where: { senderId: currentUserId },
+      });
+
+      // 2. Delete all pinned chat entries belonging to this user
+      await prisma.pinnedChat.deleteMany({
+        where: { userId: currentUserId },
+      });
+
+      // 3. Delete call history records involving this user
+      await prisma.call.deleteMany({
+        where: {
+          OR: [{ callerId: currentUserId }, { receiverId: currentUserId }],
+        },
+      });
+
+      // 4. Update user's online state to false
+      await prisma.user.update({
+        where: { id: currentUserId },
+        data: { isOnline: false, lastSeen: new Date() },
+      });
+    }
+
+    return res.json({
+      message: 'Emergency Delete (Panic Mode) executed successfully.',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('Execute Panic Delete error:', error);
+    return res.status(500).json({ message: 'Failed to process Emergency Delete.' });
   }
 };

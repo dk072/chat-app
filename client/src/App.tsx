@@ -14,6 +14,7 @@ import CallOverlay from './components/call/CallOverlay';
 import AnimatedBackground from './components/ui/AnimatedBackground';
 import PageTransition from './components/ui/PageTransition';
 import { CallSidebar } from './components/chat/CallSidebar';
+import PanicButton from './components/chat/PanicButton';
 
 // Lazy-loaded heavy components for code-splitting and faster initial page loads
 const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard'));
@@ -142,6 +143,7 @@ const MainLayout: React.FC = () => {
       </React.Suspense>
 
       <CallOverlay />
+      <PanicButton />
     </div>
   );
 };
