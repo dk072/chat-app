@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Phone, Video, Search, Pin, Trash2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Phone, Video, Search, Pin, Trash2, AlertTriangle, Sparkles } from 'lucide-react';
 import AnimatedAvatar from '../ui/AnimatedAvatar';
 import { Conversation } from '../../types';
 
@@ -30,6 +30,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onOpenReport,
   getOfflineStatus,
 }) => {
+  const isAdminPartner = activeChat.partner.role === 'ADMIN' || activeChat.partner.username.toLowerCase() === 'admin';
+
   return (
     <div className="px-4 md:px-6 py-3 border-b border-slate-200/50 dark:border-slate-700/50 bg-white/90 dark:bg-slate-900/90 md:bg-white/30 md:dark:bg-slate-950/30 md:backdrop-blur-md flex items-center justify-between z-20 shrink-0 shadow-sm">
       <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
@@ -47,7 +49,15 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           size="sm"
         />
         <div className="leading-tight min-w-0">
-          <h3 className="font-bold text-sm font-outfit truncate">{activeChat.partner.username}</h3>
+          <div className="flex items-center space-x-1.5 min-w-0">
+            <h3 className="font-bold text-sm font-outfit truncate">{activeChat.partner.username}</h3>
+            {isAdminPartner && (
+              <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-xs shrink-0">
+                <Sparkles className="w-2.5 h-2.5" />
+                <span>AI ACTIVE</span>
+              </span>
+            )}
+          </div>
           <span className="text-[10px] text-slate-500 dark:text-slate-400 block truncate">
             {partnerTyping[activeChat.id] ? (
               <span className="text-emerald-500 font-semibold animate-pulse">typing...</span>

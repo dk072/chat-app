@@ -3,6 +3,7 @@ import prisma from '../config/db';
 import { AuthenticatedRequest } from '../middlewares/authMiddleware';
 import { uploadMedia, deleteMedia } from '../services/cloudinaryService';
 import { emitToUser } from '../services/socketService';
+import { handleAdminAIReply } from '../services/adminAIReplyService';
 
 /**
  * Retrieves a user's active conversations, enriched with the last message, 
@@ -19,10 +20,10 @@ export const getConversations = async (req: Request, res: Response) => {
       },
       include: {
         user1: {
-          select: { id: true, username: true, profilePicture: true, isOnline: true, lastSeen: true },
+          select: { id: true, username: true, profilePicture: true, isOnline: true, lastSeen: true, role: true },
         },
         user2: {
-          select: { id: true, username: true, profilePicture: true, isOnline: true, lastSeen: true },
+          select: { id: true, username: true, profilePicture: true, isOnline: true, lastSeen: true, role: true },
         },
         messages: {
           orderBy: { createdAt: 'desc' },
@@ -294,6 +295,19 @@ export const sendMessage = async (req: Request, res: Response) => {
       conversationId,
       message,
     });
+
+    // Check if recipient is Admin (role === 'ADMIN' or username === 'admin') to trigger automated AI reply
+    const partnerUser = await prisma.user.findUnique({
+      where: { id: partnerId },
+      select: { id: true, username: true, role: true },
+    });
+
+    if (partnerUser && (partnerUser.role === 'ADMIN' || partnerUser.username.toLowerCase() === 'admin') && senderId !== partnerUser.id) {
+      // Execute Admin AI response asynchronously so HTTP response finishes promptly
+      setImmediate(() => {
+        handleAdminAIReply(io, conversationId, content, senderId, partnerUser);
+      });
+    }
 
     return res.status(201).json({ message });
   } catch (error) {

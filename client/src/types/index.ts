@@ -58,6 +58,7 @@ export interface Conversation {
     status?: 'ONLINE' | 'AWAY' | 'BUSY' | 'OFFLINE';
     lastSeen: string;
     bio?: string;
+    role?: 'USER' | 'ADMIN';
   };
   lastMessage: Message | null;
   unreadCount: number;
