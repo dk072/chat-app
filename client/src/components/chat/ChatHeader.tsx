@@ -52,9 +52,9 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           <div className="flex items-center space-x-1.5 min-w-0">
             <h3 className="font-bold text-sm font-outfit truncate">{activeChat.partner.username}</h3>
             {isAdminPartner && (
-              <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-xs shrink-0">
+              <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-xs shrink-0" title="Admin Support Assistant">
                 <Sparkles className="w-2.5 h-2.5" />
-                <span>AI ACTIVE</span>
+                <span>Support Team</span>
               </span>
             )}
           </div>
