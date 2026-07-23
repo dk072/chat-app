@@ -155,10 +155,19 @@ export const StoriesBar: React.FC = () => {
   };
 
   const handleSelectTrack = (track: any) => {
-    setBgMusic(track.previewUrl);
+    const audioSrc = track.previewUrl;
+    setBgMusic(audioSrc);
     setMusicName(`${track.trackName} - ${track.artistName}`);
     setMusicStartTime(0);
     setMusicDuration(0);
+    
+    // Calculate duration for the online track so the trimmer appears
+    const audio = new window.Audio();
+    audio.src = audioSrc;
+    audio.onloadedmetadata = () => {
+      setMusicDuration(audio.duration);
+    };
+    
     setShowMusicSearch(false);
     setSearchQuery('');
     setSearchResults([]);
