@@ -43,10 +43,10 @@ const AdvancedAnalyticsTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 className="text-xl font-bold text-slate-800 flex items-center space-x-2">
-            <BarChart2 className="w-5 h-5 text-brand-500" />
+          <h2 className="text-lg sm:text-xl font-bold text-slate-800 flex items-center space-x-2">
+            <BarChart2 className="w-5 h-5 text-brand-500 shrink-0" />
             <span>Advanced Analytics & Growth Forecasting</span>
           </h2>
           <p className="text-xs text-slate-500">Retention Cohorts, Peak Hours Heatmap & AI Insights</p>
@@ -54,7 +54,7 @@ const AdvancedAnalyticsTab: React.FC = () => {
 
         <button
           onClick={handleExportCsv}
-          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all shadow-xs"
+          className="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 transition-all shadow-xs shrink-0"
         >
           <Download className="w-4 h-4" />
           <span>Export Analytics CSV</span>
@@ -62,29 +62,29 @@ const AdvancedAnalyticsTab: React.FC = () => {
       </div>
 
       {/* Top Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs">
-          <span className="text-xs font-bold text-slate-400 block mb-1">30-DAY RETENTION</span>
-          <div className="text-3xl font-extrabold text-brand-600">{analytics.overview.retentionRate30DayPct}%</div>
-          <p className="text-[11px] text-slate-500 mt-1">Cohort engagement rate</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs">
+          <span className="text-[10px] sm:text-xs font-bold text-slate-400 block mb-1">30-DAY RETENTION</span>
+          <div className="text-xl sm:text-3xl font-extrabold text-brand-600">{analytics.overview.retentionRate30DayPct}%</div>
+          <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1">Cohort engagement rate</p>
         </div>
 
-        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs">
-          <span className="text-xs font-bold text-slate-400 block mb-1">DAILY ACTIVE USERS</span>
-          <div className="text-3xl font-extrabold text-indigo-600">{analytics.overview.dailyActiveUserEngagementPct}%</div>
-          <p className="text-[11px] text-slate-500 mt-1">DAU / MAU ratio</p>
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs">
+          <span className="text-[10px] sm:text-xs font-bold text-slate-400 block mb-1">DAILY ACTIVE USERS</span>
+          <div className="text-xl sm:text-3xl font-extrabold text-indigo-600">{analytics.overview.dailyActiveUserEngagementPct}%</div>
+          <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1">DAU / MAU ratio</p>
         </div>
 
-        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs">
-          <span className="text-xs font-bold text-slate-400 block mb-1">GROWTH PREDICTION (30D)</span>
-          <div className="text-3xl font-extrabold text-emerald-600">+{analytics.overview.projectedMonthlyGrowth}</div>
-          <p className="text-[11px] text-slate-500 mt-1">Projected total: {analytics.overview.predictedTotalUsers30Days}</p>
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs">
+          <span className="text-[10px] sm:text-xs font-bold text-slate-400 block mb-1 truncate">GROWTH PREDICTION (30D)</span>
+          <div className="text-xl sm:text-3xl font-extrabold text-emerald-600">+{analytics.overview.projectedMonthlyGrowth}</div>
+          <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1 truncate">Projected: {analytics.overview.predictedTotalUsers30Days}</p>
         </div>
 
-        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs">
-          <span className="text-xs font-bold text-slate-400 block mb-1">TOTAL CONVERSATIONS</span>
-          <div className="text-3xl font-extrabold text-slate-800">{analytics.overview.totalConversations}</div>
-          <p className="text-[11px] text-slate-500 mt-1">1-on-1 channels</p>
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs">
+          <span className="text-[10px] sm:text-xs font-bold text-slate-400 block mb-1 truncate">TOTAL CONVERSATIONS</span>
+          <div className="text-xl sm:text-3xl font-extrabold text-slate-800">{analytics.overview.totalConversations}</div>
+          <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1">1-on-1 channels</p>
         </div>
       </div>
 

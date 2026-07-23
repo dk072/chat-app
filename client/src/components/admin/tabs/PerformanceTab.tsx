@@ -21,10 +21,10 @@ const PerformanceTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 className="text-xl font-bold text-slate-800 flex items-center space-x-2">
-            <Cpu className="w-5 h-5 text-brand-500" />
+          <h2 className="text-lg sm:text-xl font-bold text-slate-800 flex items-center space-x-2">
+            <Cpu className="w-5 h-5 text-brand-500 shrink-0" />
             <span>Performance & System Telemetry</span>
           </h2>
           <p className="text-xs text-slate-500">Cache Hit Ratios, Database Latency & Background Job Queues</p>
@@ -32,7 +32,7 @@ const PerformanceTab: React.FC = () => {
 
         <button
           onClick={fetchMetrics}
-          className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all"
+          className="w-full sm:w-auto px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 transition-all shrink-0"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           <span>Refresh Snapshot</span>
@@ -41,7 +41,7 @@ const PerformanceTab: React.FC = () => {
 
       {metrics && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
             <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs">
               <span className="text-xs font-bold text-slate-400 block mb-1">CACHE HIT RATIO</span>
               <div className="text-3xl font-extrabold text-emerald-600">{metrics.cacheHitRatioPct}%</div>

@@ -46,21 +46,21 @@ const UserIntelligenceTab: React.FC<UserIntelligenceTabProps> = ({ users }) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 className="text-xl font-bold text-slate-800 flex items-center space-x-2">
-            <Users className="w-5 h-5 text-brand-500" />
+          <h2 className="text-lg sm:text-xl font-bold text-slate-800 flex items-center space-x-2">
+            <Users className="w-5 h-5 text-brand-500 shrink-0" />
             <span>Advanced User Intelligence & Risk Graph</span>
           </h2>
           <p className="text-xs text-slate-500">Multi-Account Detection, Device Signatures & IP Lineage</p>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
           {/* User Selector Dropdown */}
           <select
             value={selectedUserId}
             onChange={(e) => setSelectedUserId(e.target.value)}
-            className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-500"
+            className="w-full sm:w-auto px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-500 truncate"
           >
             {users.map((u) => (
               <option key={u.id} value={u.id}>
@@ -73,56 +73,55 @@ const UserIntelligenceTab: React.FC<UserIntelligenceTabProps> = ({ users }) => {
           {selectedUserId && (
             <button
               onClick={handlePurgeUserMessages}
-              className="px-4 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold rounded-xl text-xs flex items-center space-x-1.5 transition-all border border-amber-200"
+              className="w-full sm:w-auto px-4 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold rounded-xl text-xs flex items-center justify-center space-x-1.5 transition-all border border-amber-200 shrink-0"
               title="One-click delete all messages sent by this user"
             >
-              <MessageSquareX className="w-4 h-4 text-amber-600" />
+              <MessageSquareX className="w-4 h-4 text-amber-600 shrink-0" />
               <span>Purge All Messages</span>
             </button>
           )}
         </div>
       </div>
 
-
       {profile && (
         <div className="space-y-6">
           {/* Top Overview Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-            <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs">
-              <span className="text-xs font-bold text-slate-400 block mb-1">TRUST SCORE</span>
-              <div className="text-3xl font-extrabold text-emerald-600">{profile.trustScore} / 100</div>
-              <p className="text-[11px] text-slate-500 mt-1">Based on activity & account age</p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+            <div className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs">
+              <span className="text-[10px] sm:text-xs font-bold text-slate-400 block mb-1">TRUST SCORE</span>
+              <div className="text-xl sm:text-3xl font-extrabold text-emerald-600">{profile.trustScore} / 100</div>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1">Based on activity & age</p>
             </div>
 
-            <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs">
-              <span className="text-xs font-bold text-slate-400 block mb-1">RISK SCORE</span>
-              <div className={`text-3xl font-extrabold ${profile.riskScore > 30 ? 'text-rose-600' : 'text-slate-800'}`}>
+            <div className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs">
+              <span className="text-[10px] sm:text-xs font-bold text-slate-400 block mb-1">RISK SCORE</span>
+              <div className={`text-xl sm:text-3xl font-extrabold ${profile.riskScore > 30 ? 'text-rose-600' : 'text-slate-800'}`}>
                 {profile.riskScore} / 100
               </div>
-              <p className="text-[11px] text-slate-500 mt-1">Automated threat level</p>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1">Automated threat level</p>
             </div>
 
-            <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs">
-              <span className="text-xs font-bold text-slate-400 block mb-1">DISPOSABLE EMAIL</span>
-              <div className="mt-2">
+            <div className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs">
+              <span className="text-[10px] sm:text-xs font-bold text-slate-400 block mb-1 truncate">DISPOSABLE EMAIL</span>
+              <div className="mt-1.5 sm:mt-2">
                 {profile.isDisposableEmail ? (
-                  <span className="px-3 py-1 bg-rose-100 text-rose-700 text-xs font-bold rounded-lg">FLAGGED</span>
+                  <span className="px-2.5 py-0.5 sm:px-3 sm:py-1 bg-rose-100 text-rose-700 text-[10px] sm:text-xs font-bold rounded-lg">FLAGGED</span>
                 ) : (
-                  <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-lg">VERIFIED</span>
+                  <span className="px-2.5 py-0.5 sm:px-3 sm:py-1 bg-emerald-100 text-emerald-700 text-[10px] sm:text-xs font-bold rounded-lg">VERIFIED</span>
                 )}
               </div>
             </div>
 
-            <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs">
-              <span className="text-xs font-bold text-slate-400 block mb-1">ALT ACCOUNT DETECTION</span>
-              <div className="text-2xl font-bold text-slate-800 mt-1">
+            <div className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs">
+              <span className="text-[10px] sm:text-xs font-bold text-slate-400 block mb-1 truncate">ALT ACCOUNT DETECTION</span>
+              <div className="text-lg sm:text-2xl font-bold text-slate-800 mt-1">
                 {profile.sharedIpAccounts.length} candidates
               </div>
             </div>
           </div>
 
           {/* Details Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Device History */}
             <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-xs">
               <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center space-x-2">

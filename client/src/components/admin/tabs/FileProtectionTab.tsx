@@ -34,31 +34,31 @@ const FileProtectionTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 className="text-xl font-bold text-slate-800 flex items-center space-x-2">
-            <FolderKey className="w-5 h-5 text-brand-500" />
+          <h2 className="text-lg sm:text-xl font-bold text-slate-800 flex items-center space-x-2">
+            <FolderKey className="w-5 h-5 text-brand-500 shrink-0" />
             <span>File & Media Protection Suite</span>
           </h2>
           <p className="text-xs text-slate-500">Duplicate Hash Scanner, Malware Inspector & Storage Cleaner</p>
         </div>
 
-        <div className="flex space-x-2">
+        <div className="flex items-center space-x-2 w-full sm:w-auto">
           <button
             onClick={fetchScan}
-            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all"
+            className="flex-1 sm:flex-none px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 transition-all shrink-0"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>Rescan Storage</span>
+            <span>Rescan</span>
           </button>
 
           <button
             onClick={handleCleanup}
             disabled={cleaning}
-            className="px-4 py-2 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all shadow-xs"
+            className="flex-1 sm:flex-none px-4 py-2 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 transition-all shadow-xs shrink-0"
           >
             <Trash2 className="w-4 h-4" />
-            <span>{cleaning ? 'Cleaning...' : 'Cleanup Broken Media'}</span>
+            <span>{cleaning ? 'Cleaning...' : 'Cleanup Media'}</span>
           </button>
         </div>
       </div>
@@ -66,7 +66,7 @@ const FileProtectionTab: React.FC = () => {
       {scanData && (
         <div className="space-y-6">
           {/* Top Overview Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
             <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs">
               <span className="text-xs font-bold text-slate-400 block mb-1">TOTAL MEDIA FILES</span>
               <div className="text-3xl font-extrabold text-slate-800">{scanData.totalMediaFiles}</div>

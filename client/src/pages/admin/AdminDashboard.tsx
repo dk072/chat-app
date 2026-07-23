@@ -343,7 +343,7 @@ const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
       {/* Real-Time System Toast Banner */}
       {systemToast && (
-        <div className="fixed top-4 right-4 z-50 p-4 bg-slate-900 text-white rounded-2xl shadow-2xl border border-brand-500 flex items-start space-x-3 max-w-sm animate-bounce">
+        <div className="fixed top-4 right-4 left-4 sm:left-auto z-50 p-4 bg-slate-900 text-white rounded-2xl shadow-2xl border border-brand-500 flex items-start space-x-3 max-w-sm animate-bounce">
           <Bell className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
           <div className="flex-1 text-xs">
             <h4 className="font-bold text-white mb-0.5">{systemToast.title}</h4>
@@ -368,8 +368,8 @@ const Dashboard: React.FC = () => {
 
       {/* Mobile Slide-Out Drawer */}
       {isMobileSidebarOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex">
-          <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col h-full border-r border-slate-800 p-4 space-y-4">
+        <div className="md:hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex">
+          <aside className="w-72 max-w-[85vw] bg-slate-900 text-slate-300 flex flex-col h-full border-r border-slate-800 p-4 space-y-4">
             <div className="flex justify-between items-center pb-2 border-b border-slate-800">
               <span className="font-bold text-white text-sm">Admin Navigation</span>
               <button onClick={() => setIsMobileSidebarOpen(false)} className="p-1 text-slate-400 hover:text-white">
@@ -431,95 +431,183 @@ const Dashboard: React.FC = () => {
         </div>
       </aside>
 
-
       {/* Main Content Area */}
-      <main className="flex-1 h-screen overflow-y-auto overflow-x-hidden p-8 flex flex-col space-y-6 custom-admin-content-scroll">
+      <main className="flex-1 min-h-screen md:h-screen overflow-y-auto overflow-x-hidden p-3.5 sm:p-6 md:p-8 flex flex-col space-y-4 sm:space-y-6 custom-admin-content-scroll">
         {/* Top Navbar */}
-        <header className="flex justify-between items-center bg-white p-4 rounded-3xl border border-slate-100 shadow-xs">
+        <header className="flex flex-row items-center justify-between gap-2 bg-white p-3 sm:p-4 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs">
           <button
             onClick={() => setIsCommandPaletteOpen(true)}
-            className="flex items-center space-x-3 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-400 hover:bg-slate-100 transition-all font-medium"
+            className="flex-1 min-w-0 flex items-center justify-between px-3 sm:px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-400 hover:bg-slate-100 transition-all font-medium"
           >
-            <Command className="w-4 h-4 text-slate-500" />
-            <span>Search or run commands...</span>
-            <kbd className="px-2 py-0.5 bg-white rounded border border-slate-200 text-[10px] font-bold text-slate-600">
+            <div className="flex items-center space-x-2 min-w-0 truncate">
+              <Command className="w-4 h-4 text-slate-500 shrink-0" />
+              <span className="truncate">Search commands...</span>
+            </div>
+            <kbd className="hidden sm:inline-flex px-2 py-0.5 bg-white rounded border border-slate-200 text-[10px] font-bold text-slate-600 shrink-0 ml-2">
               Ctrl + K
             </kbd>
           </button>
 
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={() => setIsCopilotOpen(true)}
-              className="px-3.5 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-xl text-xs font-bold flex items-center space-x-2 transition-all"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>Ask AI Copilot</span>
-            </button>
-          </div>
+          <button
+            onClick={() => setIsCopilotOpen(true)}
+            className="shrink-0 px-3 sm:px-3.5 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-xl text-xs font-bold flex items-center space-x-1.5 sm:space-x-2 transition-all"
+          >
+            <Sparkles className="w-4 h-4 text-indigo-600 shrink-0" />
+            <span className="hidden xs:inline">Ask </span>
+            <span>AI Copilot</span>
+          </button>
         </header>
 
         {/* Stats Overview Bar */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-white p-6 rounded-3xl shadow-xs border border-slate-100 flex items-center space-x-4">
-              <div className="p-4 rounded-2xl bg-blue-50 text-blue-500">
-                <Users className="w-6 h-6" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            <div className="bg-white p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xs border border-slate-100 flex items-center space-x-3 sm:space-x-4">
+              <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-blue-50 text-blue-500 shrink-0">
+                <Users className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div>
-                <p className="text-sm text-slate-500 font-medium">Total Users</p>
-                <p className="text-2xl font-bold text-slate-800">{stats.totalUsers}</p>
-              </div>
-            </div>
-            <div className="bg-white p-6 rounded-3xl shadow-xs border border-slate-100 flex items-center space-x-4">
-              <div className="p-4 rounded-2xl bg-indigo-50 text-indigo-500">
-                <BarChart2 className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm text-slate-500 font-medium">Total Messages</p>
-                <p className="text-2xl font-bold text-slate-800">{stats.totalMessages}</p>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-slate-500 font-medium truncate">Total Users</p>
+                <p className="text-lg sm:text-2xl font-bold text-slate-800">{stats.totalUsers}</p>
               </div>
             </div>
-            <div className="bg-white p-6 rounded-3xl shadow-xs border border-slate-100 flex items-center space-x-4">
-              <div className="p-4 rounded-2xl bg-emerald-50 text-emerald-500">
-                <CheckCircle className="w-6 h-6" />
+            <div className="bg-white p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xs border border-slate-100 flex items-center space-x-3 sm:space-x-4">
+              <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-indigo-50 text-indigo-500 shrink-0">
+                <BarChart2 className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div>
-                <p className="text-sm text-slate-500 font-medium">Active Today</p>
-                <p className="text-2xl font-bold text-slate-800">{stats.activeUsers}</p>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-slate-500 font-medium truncate">Total Messages</p>
+                <p className="text-lg sm:text-2xl font-bold text-slate-800">{stats.totalMessages}</p>
               </div>
             </div>
-            <div className="bg-white p-6 rounded-3xl shadow-xs border border-slate-100 flex items-center space-x-4">
-              <div className="p-4 rounded-2xl bg-rose-50 text-rose-500">
-                <AlertOctagon className="w-6 h-6" />
+            <div className="bg-white p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xs border border-slate-100 flex items-center space-x-3 sm:space-x-4">
+              <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-emerald-50 text-emerald-500 shrink-0">
+                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div>
-                <p className="text-sm text-slate-500 font-medium">Pending Reports</p>
-                <p className="text-2xl font-bold text-slate-800">{stats.pendingReports}</p>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-slate-500 font-medium truncate">Active Today</p>
+                <p className="text-lg sm:text-2xl font-bold text-slate-800">{stats.activeUsers}</p>
+              </div>
+            </div>
+            <div className="bg-white p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-xs border border-slate-100 flex items-center space-x-3 sm:space-x-4">
+              <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-rose-50 text-rose-500 shrink-0">
+                <AlertOctagon className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-slate-500 font-medium truncate">Pending Reports</p>
+                <p className="text-lg sm:text-2xl font-bold text-slate-800">{stats.pendingReports}</p>
               </div>
             </div>
           </div>
         )}
 
         {/* Dynamic Tab Content Box */}
-        <div className="bg-white rounded-3xl shadow-xs border border-slate-100 p-6 min-h-[65vh]">
+        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xs border border-slate-100 p-4 sm:p-6 min-h-[65vh]">
           {/* Core Tabs */}
           {activeTab === 'users' && (
             <div>
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
                 <h2 className="text-lg font-bold text-slate-800">User Management</h2>
-                <div className="relative">
+                <div className="relative w-full sm:w-64">
                   <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
                     placeholder="Search users..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 text-sm w-64 text-slate-800"
+                    className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 text-sm text-slate-800"
                   />
                 </div>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+
+              {/* Mobile Card Layout for Users */}
+              <div className="md:hidden space-y-3">
+                {users.map((u) => (
+                  <div key={u.id} className="p-4 bg-slate-50/70 border border-slate-200/80 rounded-2xl space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="font-bold text-slate-800 text-sm">{u.username}</div>
+                        <div className="text-xs text-slate-500">{u.email}</div>
+                      </div>
+                      <div className="flex items-center space-x-1.5">
+                        <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${u.role === 'ADMIN' ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-700'}`}>
+                          {u.role}
+                        </span>
+                        {u.isBanned ? (
+                          <span className="px-2 py-0.5 bg-rose-100 text-rose-700 rounded-lg text-[10px] font-bold">Banned</span>
+                        ) : (
+                          <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-lg text-[10px] font-bold">Active</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-200/50">
+                      <span className="text-slate-400 text-[11px]">Password Hash:</span>
+                      <div className="flex items-center space-x-1.5">
+                        <span className="font-mono bg-white px-2 py-0.5 rounded border border-slate-200 text-[10px] text-slate-700 max-w-[120px] truncate">
+                          {visiblePasswords[u.id] ? u.passwordHash || u.password || '$2b$10$Encrypted' : '••••••••••••'}
+                        </span>
+                        <button
+                          onClick={() => setVisiblePasswords((prev) => ({ ...prev, [u.id]: !prev[u.id] }))}
+                          className="p-1 text-slate-400 hover:text-slate-700 bg-white rounded border border-slate-200"
+                        >
+                          {visiblePasswords[u.id] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                        </button>
+                        {visiblePasswords[u.id] && u.passwordHash && (
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(u.passwordHash || '');
+                              setCopiedUserId(u.id);
+                              setTimeout(() => setCopiedUserId(null), 2000);
+                            }}
+                            className="p-1 text-slate-400 hover:text-brand-600 bg-white rounded border border-slate-200"
+                          >
+                            {copiedUserId === u.id ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {u.role !== 'ADMIN' && (
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/50">
+                        <button
+                          onClick={() => setResetPasswordModal({ isOpen: true, user: u, newPassword: '', loading: false, error: null })}
+                          className="px-2.5 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1"
+                        >
+                          <Key className="w-3.5 h-3.5" />
+                          <span>Reset Pass</span>
+                        </button>
+                        <button
+                          onClick={() => handleBanToggle(u.id)}
+                          className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1 ${
+                            u.isBanned ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                          }`}
+                        >
+                          {u.isBanned ? <CheckCircle className="w-3.5 h-3.5" /> : <Ban className="w-3.5 h-3.5" />}
+                          <span>{u.isBanned ? 'Unban' : 'Ban'}</span>
+                        </button>
+                        <button
+                          onClick={() => handlePurgeUserMessages(u.id, u.username)}
+                          className="px-2.5 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1"
+                        >
+                          <MessageSquareX className="w-3.5 h-3.5" />
+                          <span>Purge Msgs</span>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(u.id)}
+                          className="px-2.5 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop View: Table */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[650px]">
                   <thead>
                     <tr className="border-b border-slate-100 text-sm text-slate-500">
                       <th className="pb-4 font-medium pl-4">User</th>

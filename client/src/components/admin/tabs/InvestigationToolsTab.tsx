@@ -26,19 +26,19 @@ const InvestigationToolsTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 className="text-xl font-bold text-slate-800 flex items-center space-x-2">
-            <Search className="w-5 h-5 text-brand-500" />
+          <h2 className="text-lg sm:text-xl font-bold text-slate-800 flex items-center space-x-2">
+            <Search className="w-5 h-5 text-brand-500 shrink-0" />
             <span>Chat Investigation & Forensic Tools</span>
           </h2>
           <p className="text-xs text-slate-500">Deleted Message Audits, Conversation Timelines & Evidence Export</p>
         </div>
 
-        <div className="flex space-x-2 bg-slate-100 p-1 rounded-xl">
+        <div className="flex space-x-2 bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
           <button
             onClick={() => setActiveSubTab('deleted')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`w-full sm:w-auto px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               activeSubTab === 'deleted' ? 'bg-white text-slate-800 shadow-xs' : 'text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -48,21 +48,21 @@ const InvestigationToolsTab: React.FC = () => {
       </div>
 
       {activeSubTab === 'deleted' && (
-        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-xs space-y-5">
-          <div className="flex justify-between items-center">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs space-y-5">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <h3 className="text-sm font-bold text-slate-800 flex items-center space-x-2">
-              <Trash2 className="w-4 h-4 text-rose-500" />
+              <Trash2 className="w-4 h-4 text-rose-500 shrink-0" />
               <span>Search Deleted & Modified Messages</span>
             </h3>
 
-            <div className="relative">
+            <div className="relative w-full sm:w-64">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search deleted message content..."
+                placeholder="Search deleted messages..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 w-64 text-slate-800"
+                className="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-brand-500 text-slate-800"
               />
             </div>
           </div>

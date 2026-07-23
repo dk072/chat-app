@@ -208,7 +208,7 @@ const SecurityPermissionsTab: React.FC = () => {
           <h3 className="text-sm font-bold text-slate-800">IP Blacklist & Whitelist Management</h3>
 
           {/* Add Rule Form */}
-          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
             <input
               type="text"
               placeholder="IP Address (e.g., 192.168.1.50)"
