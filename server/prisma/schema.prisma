@@ -234,6 +234,7 @@ model UserStory {
   mediaUrl       String?
   musicUrl       String?
   musicName      String?
+  musicStartTime Int      @default(0)
   bgGradient     String   @default("from-indigo-600 to-purple-600")
   views          String   @default("[]") // JSON stringified array of user IDs
   createdAt      DateTime @default(now())
