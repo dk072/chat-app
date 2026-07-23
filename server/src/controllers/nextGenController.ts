@@ -348,6 +348,39 @@ export const recordStoryViewHandler = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteStoryHandler = async (req: Request, res: Response) => {
+  const authReq = req as AuthenticatedRequest;
+  const userId = authReq.user!.id;
+  const { storyId } = req.params;
+
+  try {
+    const dbStory = await prisma.userStory.findUnique({
+      where: { id: storyId },
+    });
+
+    if (!dbStory) {
+      return res.status(404).json({ message: 'Story not found.' });
+    }
+
+    if (dbStory.userId !== userId) {
+      return res.status(403).json({ message: 'Unauthorized to delete this story.' });
+    }
+
+    await prisma.userStory.delete({
+      where: { id: storyId },
+    });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('story_deleted', { storyId });
+    }
+
+    return res.json({ message: 'Story deleted successfully.', storyId });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error deleting story.' });
+  }
+};
+
 export const setDisappearingTimerHandler = async (req: Request, res: Response) => {
   const { conversationId } = req.params;
   const { timerHours = 24 } = req.body;

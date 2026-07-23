@@ -271,9 +271,30 @@ export const StoriesBar: React.FC = () => {
                 <AnimatedAvatar src={activeStory.profilePicture} name={activeStory.username} size="xs" />
                 <span className="font-bold text-xs">{activeStory.username}</span>
               </div>
-              <button onClick={() => setActiveStory(null)} className="p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-white">
-                <X className="w-4 h-4" />
-              </button>
+              <div className="flex items-center space-x-2">
+                {activeStory.userId === user?.id && (
+                  <button
+                    onClick={async () => {
+                      if (window.confirm('Are you sure you want to delete this status update?')) {
+                        try {
+                          await api.delete(`/nextgen/stories/${activeStory.id}`);
+                          setActiveStory(null);
+                          fetchStories();
+                        } catch (e) {
+                          alert('Error deleting status');
+                        }
+                      }
+                    }}
+                    className="p-1.5 rounded-full bg-black/40 hover:bg-rose-500/80 text-white transition-colors"
+                    title="Delete Status"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+                <button onClick={() => setActiveStory(null)} className="p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-white">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
             {/* Story Text */}
