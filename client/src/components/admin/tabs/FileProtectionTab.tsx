@@ -5,13 +5,17 @@ import api from '../../../services/api';
 const FileProtectionTab: React.FC = () => {
   const [scanData, setScanData] = useState<any>(null);
   const [cleaning, setCleaning] = useState(false);
+  const [isRescanning, setIsRescanning] = useState(false);
 
   const fetchScan = async () => {
+    setIsRescanning(true);
     try {
       const res = await api.get('/admin/advanced/media/scan');
       setScanData(res.data.scanResult);
     } catch (err) {
       console.error(err);
+    } finally {
+      setTimeout(() => setIsRescanning(false), 500);
     }
   };
 
@@ -46,10 +50,11 @@ const FileProtectionTab: React.FC = () => {
         <div className="flex items-center space-x-2 w-full sm:w-auto">
           <button
             onClick={fetchScan}
-            className="flex-1 sm:flex-none px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 transition-all shrink-0"
+            disabled={isRescanning}
+            className="flex-1 sm:flex-none px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 transition-all shrink-0 cursor-pointer active:scale-95 disabled:opacity-50"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Rescan</span>
+            <RefreshCw className={`w-3.5 h-3.5 ${isRescanning ? 'animate-spin text-brand-600' : ''}`} />
+            <span>{isRescanning ? 'Rescanning...' : 'Rescan Storage'}</span>
           </button>
 
           <button

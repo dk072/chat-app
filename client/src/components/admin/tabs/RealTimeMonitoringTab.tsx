@@ -10,13 +10,17 @@ interface RealTimeMonitoringTabProps {
 const RealTimeMonitoringTab: React.FC<RealTimeMonitoringTabProps> = ({ socket }) => {
   const [metrics, setMetrics] = useState<TelemetryMetrics | null>(null);
   const [eventLogs, setEventLogs] = useState<{ id: string; time: string; type: string; msg: string }[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchMetrics = async () => {
+    setIsRefreshing(true);
     try {
       const res = await api.get('/admin/advanced/metrics');
       setMetrics(res.data.metrics);
     } catch (err) {
       console.error('Error fetching metrics:', err);
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 500);
     }
   };
 
@@ -64,10 +68,11 @@ const RealTimeMonitoringTab: React.FC<RealTimeMonitoringTabProps> = ({ socket })
         </div>
         <button
           onClick={fetchMetrics}
-          className="w-full sm:w-auto px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 transition-all shrink-0"
+          disabled={isRefreshing}
+          className="w-full sm:w-auto px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 transition-all shrink-0 cursor-pointer active:scale-95 disabled:opacity-50"
         >
-          <RefreshCw className="w-3.5 h-3.5" />
-          <span>Refresh Snapshot</span>
+          <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-brand-600' : ''}`} />
+          <span>{isRefreshing ? 'Refreshing...' : 'Refresh Snapshot'}</span>
         </button>
       </div>
 
