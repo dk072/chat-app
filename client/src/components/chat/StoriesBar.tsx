@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { Plus, X, Eye, Sparkles, Image, Trash2, Music } from 'lucide-react';
+import { Plus, X, Eye, Sparkles, Image, Trash2, Music, Search, Loader2 } from 'lucide-react';
 import api from '../../services/api';
 import AnimatedAvatar from '../ui/AnimatedAvatar';
 import { useAuth } from '../../context/AuthContext';
@@ -30,7 +30,12 @@ export const StoriesBar: React.FC = () => {
   const [bgMusic, setBgMusic] = useState<string | null>(null);
   const [musicName, setMusicName] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
-  const musicInputRef = useRef<HTMLInputElement>(null);
+  
+  // Music Search States
+  const [showMusicSearch, setShowMusicSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearchingMusic, setIsSearchingMusic] = useState(false);
 
   const gradients = [
     'from-indigo-600 to-purple-600',
@@ -102,20 +107,27 @@ export const StoriesBar: React.FC = () => {
     }
   };
 
-  const handleMusicSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        alert("Audio file is too large. Please select a file under 5MB.");
-        return;
-      }
-      setMusicName(file.name);
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setBgMusic(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+  const handleSearchMusic = async () => {
+    if (!searchQuery.trim()) return;
+    setIsSearchingMusic(true);
+    try {
+      const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(searchQuery)}&entity=song&limit=10`);
+      const data = await response.json();
+      // Filter out results that don't have a previewUrl
+      setSearchResults(data.results?.filter((r: any) => r.previewUrl) || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSearchingMusic(false);
     }
+  };
+
+  const handleSelectTrack = (track: any) => {
+    setBgMusic(track.previewUrl);
+    setMusicName(`${track.trackName} - ${track.artistName}`);
+    setShowMusicSearch(false);
+    setSearchQuery('');
+    setSearchResults([]);
   };
 
   const handlePostStory = async () => {
@@ -249,20 +261,13 @@ export const StoriesBar: React.FC = () => {
               {/* Music Selector Controls */}
               <div className="flex justify-between items-center mt-2">
                 <button
-                  onClick={() => musicInputRef.current?.click()}
+                  onClick={() => setShowMusicSearch(true)}
                   type="button"
                   className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center space-x-1.5 border border-slate-700 transition-colors"
                 >
                   <Music className="w-4 h-4 text-pink-400 shrink-0" />
-                  <span className="truncate max-w-[120px]">{musicName ? musicName : 'Add Background Music'}</span>
+                  <span className="truncate max-w-[120px]">{musicName ? musicName : 'Search Music'}</span>
                 </button>
-                <input
-                  type="file"
-                  ref={musicInputRef}
-                  onChange={handleMusicSelect}
-                  accept="audio/*"
-                  className="hidden"
-                />
 
                 {bgMusic && (
                   <button
@@ -297,6 +302,62 @@ export const StoriesBar: React.FC = () => {
             >
               Share Status Update
             </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Music Search Modal */}
+      {showMusicSearch && ReactDOM.createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fade-in">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm overflow-hidden text-white p-6 space-y-4 shadow-2xl flex flex-col h-[500px]">
+            <div className="flex justify-between items-center">
+              <h3 className="font-bold text-sm flex items-center space-x-1.5">
+                <Music className="w-4 h-4 text-pink-400" />
+                <span>Search Music</span>
+              </h3>
+              <button onClick={() => setShowMusicSearch(false)} className="p-1 text-slate-400 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearchMusic()}
+                placeholder="Search song or artist..."
+                className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                autoFocus
+              />
+              <button 
+                onClick={handleSearchMusic}
+                disabled={isSearchingMusic || !searchQuery.trim()}
+                className="p-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-xl transition-colors"
+              >
+                {isSearchingMusic ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto no-scrollbar space-y-2">
+              {searchResults.length === 0 && !isSearchingMusic && searchQuery.length > 0 && (
+                <p className="text-center text-slate-500 text-sm mt-8">No results found.</p>
+              )}
+              {searchResults.map((track) => (
+                <div 
+                  key={track.trackId}
+                  onClick={() => handleSelectTrack(track)}
+                  className="flex items-center space-x-3 p-2 hover:bg-slate-800 rounded-xl cursor-pointer transition-colors"
+                >
+                  <img src={track.artworkUrl100} alt={track.trackName} className="w-10 h-10 rounded-md object-cover" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-white truncate">{track.trackName}</p>
+                    <p className="text-xs text-slate-400 truncate">{track.artistName}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>,
         document.body
