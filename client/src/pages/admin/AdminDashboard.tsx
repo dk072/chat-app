@@ -340,7 +340,7 @@ const Dashboard: React.FC = () => {
 
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
+    <div className="h-screen w-full bg-slate-50 flex flex-col md:flex-row overflow-hidden">
       {/* Real-Time System Toast Banner */}
       {systemToast && (
         <div className="fixed top-4 right-4 left-4 sm:left-auto z-50 p-4 bg-slate-900 text-white rounded-2xl shadow-2xl border border-brand-500 flex items-start space-x-3 max-w-sm animate-bounce">
@@ -356,7 +356,7 @@ const Dashboard: React.FC = () => {
       )}
 
       {/* Mobile Top Navbar */}
-      <div className="md:hidden bg-slate-900 p-4 flex justify-between items-center text-white sticky top-0 z-40">
+      <div className="md:hidden bg-slate-900 p-4 flex justify-between items-center text-white shrink-0 z-40">
         <div className="flex items-center space-x-2">
           <Shield className="w-6 h-6 text-brand-400" />
           <span className="font-bold text-sm">Enterprise Admin</span>
@@ -369,15 +369,15 @@ const Dashboard: React.FC = () => {
       {/* Mobile Slide-Out Drawer */}
       {isMobileSidebarOpen && (
         <div className="md:hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex">
-          <aside className="w-72 max-w-[85vw] bg-slate-900 text-slate-300 flex flex-col h-full border-r border-slate-800 p-4 space-y-4">
-            <div className="flex justify-between items-center pb-2 border-b border-slate-800">
+          <aside className="w-72 max-w-[85vw] bg-slate-900 text-slate-300 flex flex-col h-full border-r border-slate-800 p-4 space-y-4 shadow-2xl">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-800 shrink-0">
               <span className="font-bold text-white text-sm">Admin Navigation</span>
               <button onClick={() => setIsMobileSidebarOpen(false)} className="p-1 text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
             {renderNavItems()}
-            <div className="pt-2 border-t border-slate-800 space-y-2">
+            <div className="pt-2 border-t border-slate-800 space-y-2 shrink-0">
               <button
                 onClick={() => { setIsCopilotOpen(true); setIsMobileSidebarOpen(false); }}
                 className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-brand-500 to-indigo-600 text-white rounded-xl text-xs font-bold"
@@ -394,7 +394,7 @@ const Dashboard: React.FC = () => {
               </button>
             </div>
           </aside>
-          <div className="flex-1" onClick={() => setIsMobileSidebarOpen(false)} />
+          <div className="flex-1 touch-none" onClick={() => setIsMobileSidebarOpen(false)} />
         </div>
       )}
 
@@ -432,7 +432,7 @@ const Dashboard: React.FC = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 min-h-screen md:h-screen overflow-y-auto overflow-x-hidden p-3.5 sm:p-6 md:p-8 flex flex-col space-y-4 sm:space-y-6 custom-admin-content-scroll">
+      <main className="flex-1 h-full overflow-y-auto overflow-x-hidden p-3.5 sm:p-6 md:p-8 flex flex-col space-y-4 sm:space-y-6 custom-admin-content-scroll">
         {/* Top Navbar */}
         <header className="flex flex-row items-center justify-between gap-2 bg-white p-3 sm:p-4 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs">
           <button
