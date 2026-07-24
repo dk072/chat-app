@@ -16,6 +16,8 @@ import PageTransition from './components/ui/PageTransition';
 import { CallSidebar } from './components/chat/CallSidebar';
 import PanicButton from './components/chat/PanicButton';
 
+import LoginPage from './pages/LoginPage';
+
 // Lazy-loaded heavy components for code-splitting and faster initial page loads
 const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard'));
 const SettingsModal = React.lazy(() => import('./components/chat/SettingsModal'));
@@ -32,7 +34,6 @@ const MainLayout: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showStarred, setShowStarred] = useState(false);
   const [isAppLocked, setIsAppLocked] = useState(false);
-  const [isLoginView, setIsLoginView] = useState(true);
   const [activeNavView, setActiveNavView] = useState<'chats' | 'calls' | 'admin'>('chats');
   const [loadingText, setLoadingText] = useState('Connecting to secure server...');
 
@@ -68,21 +69,7 @@ const MainLayout: React.FC = () => {
   }
 
   if (!user) {
-    return (
-      <div className="h-[100dvh] w-full flex items-center justify-center bg-slate-900 overflow-hidden relative">
-        <AnimatedBackground />
-
-        <div className="z-10 w-full px-4 flex justify-center">
-          <PageTransition>
-            {isLoginView ? (
-              <LoginCard onToggle={() => setIsLoginView(false)} />
-            ) : (
-              <RegisterCard onToggle={() => setIsLoginView(true)} />
-            )}
-          </PageTransition>
-        </div>
-      </div>
-    );
+    return <Navigate to="/login" replace />;
   }
 
   return (
@@ -156,7 +143,7 @@ const AdminRoute: React.FC = () => {
   }
   
   if (!user || user.role !== 'ADMIN') {
-    return <Navigate to="/" />;
+    return <Navigate to="/" replace />;
   }
 
   return (
@@ -175,8 +162,11 @@ const App: React.FC = () => {
             <ChatProvider>
               <BrowserRouter>
                 <Routes>
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<LoginPage />} />
                   <Route path="/" element={<MainLayout />} />
                   <Route path="/admin" element={<AdminRoute />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </BrowserRouter>
             </ChatProvider>
