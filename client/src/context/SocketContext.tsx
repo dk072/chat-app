@@ -29,7 +29,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const socketUrl = import.meta.env.VITE_API_URL || window.location.origin;
     const socketInstance = io(socketUrl, {
       auth: { token },
-      transports: ['websocket'],
+      transports: ['websocket', 'polling'],
     });
 
     socketInstance.on('connect', () => {

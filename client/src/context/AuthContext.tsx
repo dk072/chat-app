@@ -28,6 +28,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
+      // If user is already set (e.g. from login/register), skip redundant network call
+      if (user) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const res = await api.get('/auth/me');
         setUser(res.data.user);
@@ -49,8 +55,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { user: loggedInUser, token: receivedToken } = res.data;
     
     localStorage.setItem('token', receivedToken);
-    setToken(receivedToken);
     setUser(loggedInUser);
+    setToken(receivedToken);
+    setLoading(false);
   };
 
   const register = async (username: string, email: string, password: string) => {
@@ -58,8 +65,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { user: registeredUser, token: receivedToken } = res.data;
     
     localStorage.setItem('token', receivedToken);
-    setToken(receivedToken);
     setUser(registeredUser);
+    setToken(receivedToken);
+    setLoading(false);
   };
 
   const logout = async () => {

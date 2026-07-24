@@ -86,15 +86,12 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const { emailOrUsername, password } = validation.data;
+    const input = emailOrUsername.toLowerCase().trim();
+    const isEmail = input.includes('@');
 
-    const user = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { email: emailOrUsername.toLowerCase() },
-          { username: emailOrUsername.toLowerCase() },
-        ],
-      },
-    });
+    const user = isEmail
+      ? await prisma.user.findUnique({ where: { email: input } })
+      : await prisma.user.findUnique({ where: { username: input } });
 
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials.' });

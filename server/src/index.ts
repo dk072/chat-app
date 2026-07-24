@@ -29,7 +29,15 @@ if (process.env.NODE_ENV === 'production' && (!process.env.JWT_SECRET || process
 }
 
 const app = express();
+app.set('trust proxy', 1);
 const server = http.createServer(app);
+
+// Pre-warm database connection pool
+prisma.$connect().then(() => {
+  console.log('[Database] Pre-connected Prisma client successfully.');
+}).catch((err) => {
+  console.error('[Database] Connection warm-up error:', err);
+});
 
 // Initialize Socket.IO with CORS
 const io = new Server(server, {
