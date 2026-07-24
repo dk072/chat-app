@@ -93,8 +93,8 @@ const PanicButton: React.FC = () => {
   return (
     <>
       <div
-        className="fixed bottom-20 right-5 sm:bottom-6 sm:right-6 z-40 flex items-center justify-center group"
-        title="Click to Wipe Out Everything (Delete from Everyone & Me)"
+        className="fixed top-3.5 right-4 sm:top-3.5 sm:right-6 z-50 flex items-center justify-center group"
+        title="Emergency Wipeout (1-Click Delete from Everyone)"
       >
         {/* Warning Pulse Aura when pressing */}
         {isPressing && (
@@ -108,7 +108,7 @@ const PanicButton: React.FC = () => {
           onMouseLeave={cancelHolding}
           onTouchStart={startHolding}
           onTouchEnd={cancelHolding}
-          className="relative w-14 h-14 rounded-full bg-gradient-to-tr from-rose-600 via-red-600 to-rose-500 shadow-xl shadow-rose-600/30 flex items-center justify-center cursor-pointer select-none transition-transform active:scale-95 border-2 border-white/20"
+          className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-to-tr from-rose-600 via-red-600 to-rose-500 shadow-lg shadow-rose-600/30 flex items-center justify-center cursor-pointer select-none transition-transform active:scale-95 border border-white/20"
         >
           {/* SVG Circular Progress Ring */}
           <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 52 52">
@@ -138,15 +138,15 @@ const PanicButton: React.FC = () => {
           {/* Panic Icon */}
           <div className="relative z-10 text-white flex flex-col items-center justify-center">
             {isPressing ? (
-              <Flame className="w-6 h-6 animate-pulse text-amber-300" />
+              <Flame className="w-5 h-5 animate-pulse text-amber-300" />
             ) : (
-              <ShieldAlert className="w-6 h-6 text-white" />
+              <ShieldAlert className="w-5 h-5 text-white" />
             )}
           </div>
         </div>
 
         {/* Hover / Press Tooltip */}
-        <div className="absolute bottom-16 right-0 px-3 py-1.5 bg-slate-900 text-white text-[11px] font-bold rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-slate-800">
+        <div className="absolute top-14 right-0 px-3 py-1.5 bg-slate-900 text-white text-[11px] font-bold rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-slate-800 z-50">
           Emergency Wipeout (1-Click Delete)
         </div>
       </div>
