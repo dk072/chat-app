@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { Plus, X, Eye, Sparkles, Image, Trash2, Music, Search, Loader2 } from 'lucide-react';
+import { Plus, X, Eye, Sparkles, Image, Trash2, Music, Search, Loader2, Play, Pause } from 'lucide-react';
 import api from '../../services/api';
 import AnimatedAvatar from '../ui/AnimatedAvatar';
 import { useAuth } from '../../context/AuthContext';
@@ -42,7 +42,58 @@ export const StoriesBar: React.FC = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearchingMusic, setIsSearchingMusic] = useState(false);
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
+  const [playingSearchTrackId, setPlayingSearchTrackId] = useState<string | number | null>(null);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+  const searchAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const togglePlaySearchTrack = (track: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    // Stop trimmer preview if playing
+    if (previewAudioRef.current) {
+      previewAudioRef.current.pause();
+      setIsPreviewPlaying(false);
+    }
+
+    if (playingSearchTrackId === track.trackId) {
+      if (searchAudioRef.current) {
+        searchAudioRef.current.pause();
+      }
+      setPlayingSearchTrackId(null);
+    } else {
+      if (searchAudioRef.current) {
+        searchAudioRef.current.pause();
+      }
+      const audio = new Audio(track.previewUrl);
+      searchAudioRef.current = audio;
+      audio.play().catch(() => {});
+      setPlayingSearchTrackId(track.trackId);
+      audio.onended = () => {
+        setPlayingSearchTrackId(null);
+      };
+    }
+  };
+
+  const handleSelectTrack = (track: any) => {
+    if (searchAudioRef.current) {
+      searchAudioRef.current.pause();
+    }
+    setPlayingSearchTrackId(null);
+
+    const audioSrc = track.previewUrl;
+    setBgMusic(audioSrc);
+    setMusicName(`${track.trackName} - ${track.artistName}`);
+    setMusicStartTime(0);
+    setMusicDuration(30);
+    
+    const audio = new window.Audio();
+    audio.src = audioSrc;
+    audio.onloadedmetadata = () => {
+      setMusicDuration(audio.duration || 30);
+    };
+    
+    setShowMusicSearch(false);
+  };
 
   const gradients = [
     'from-indigo-600 to-purple-600',
@@ -166,22 +217,6 @@ export const StoriesBar: React.FC = () => {
     } finally {
       setIsSearchingMusic(false);
     }
-  };
-
-  const handleSelectTrack = (track: any) => {
-    const audioSrc = track.previewUrl;
-    setBgMusic(audioSrc);
-    setMusicName(`${track.trackName} - ${track.artistName}`);
-    setMusicStartTime(0);
-    setMusicDuration(30);
-    
-    const audio = new window.Audio();
-    audio.src = audioSrc;
-    audio.onloadedmetadata = () => {
-      setMusicDuration(audio.duration || 30);
-    };
-    
-    setShowMusicSearch(false);
   };
 
   const handlePostStory = async () => {
@@ -530,22 +565,68 @@ export const StoriesBar: React.FC = () => {
               {!isSearchingMusic && searchResults.length === 0 && searchQuery.length > 0 && (
                 <p className="text-center text-slate-500 text-sm mt-8">No track results found.</p>
               )}
-              {!isSearchingMusic && searchResults.map((track) => (
-                <div 
-                  key={track.trackId}
-                  onClick={() => handleSelectTrack(track)}
-                  className="flex items-center space-x-3 p-2.5 hover:bg-slate-800/80 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-slate-700/60 group"
-                >
-                  <img src={track.artworkUrl100} alt={track.trackName} className="w-11 h-11 rounded-lg object-cover shadow-sm group-hover:scale-105 transition-transform" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-white truncate">{track.trackName}</p>
-                    <p className="text-[11px] text-slate-400 truncate">{track.artistName}</p>
+              {!isSearchingMusic && searchResults.map((track) => {
+                const isPlayingThis = playingSearchTrackId === track.trackId;
+                return (
+                  <div 
+                    key={track.trackId}
+                    className={`flex items-center space-x-3 p-2.5 rounded-xl transition-all border ${
+                      isPlayingThis 
+                        ? 'bg-pink-500/10 border-pink-500/40 shadow-lg shadow-pink-500/10' 
+                        : 'bg-slate-800/40 hover:bg-slate-800/80 border-slate-800 hover:border-slate-700/60'
+                    }`}
+                  >
+                    <div className="relative group shrink-0">
+                      <img 
+                        src={track.artworkUrl100} 
+                        alt={track.trackName} 
+                        className="w-11 h-11 rounded-lg object-cover shadow-sm" 
+                      />
+                      {isPlayingThis && (
+                        <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
+                          <div className="flex space-x-0.5 items-end h-3.5">
+                            <span className="w-0.5 bg-pink-400 animate-bounce h-full" style={{ animationDelay: '0.1s' }} />
+                            <span className="w-0.5 bg-pink-400 animate-bounce h-full" style={{ animationDelay: '0.2s' }} />
+                            <span className="w-0.5 bg-pink-400 animate-bounce h-full" style={{ animationDelay: '0.3s' }} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-white truncate">{track.trackName}</p>
+                      <p className="text-[11px] text-slate-400 truncate">{track.artistName}</p>
+                    </div>
+
+                    {/* Action Buttons: Listen Preview & Add */}
+                    <div className="flex items-center space-x-1.5 shrink-0">
+                      {/* Listen / Preview Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => togglePlaySearchTrack(track, e)}
+                        className={`p-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1 ${
+                          isPlayingThis 
+                            ? 'bg-pink-500 text-white shadow-md shadow-pink-500/30' 
+                            : 'bg-slate-800 hover:bg-slate-700 text-pink-400 border border-slate-700'
+                        }`}
+                        title={isPlayingThis ? 'Pause Audio' : 'Listen Preview Audio'}
+                      >
+                        {isPlayingThis ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                      </button>
+
+                      {/* Add / Select Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleSelectTrack(track)}
+                        className="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center space-x-1"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add</span>
+                      </button>
+                    </div>
                   </div>
-                  <span className="text-[10px] font-bold px-2 py-1 bg-pink-500/20 text-pink-300 rounded-full border border-pink-500/30">
-                    30s Clip
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>,
