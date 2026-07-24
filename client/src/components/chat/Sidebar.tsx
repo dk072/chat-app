@@ -52,13 +52,6 @@ const Sidebar: React.FC<SidebarProps> = () => {
   const [unreadOverrides, setUnreadOverrides] = useState<Record<string, boolean>>({});
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Dismiss context menu on click anywhere
-  useEffect(() => {
-    const handleGlobalClick = () => setContextMenu(null);
-    window.addEventListener('click', handleGlobalClick);
-    return () => window.removeEventListener('click', handleGlobalClick);
-  }, []);
-
   // Trigger search on query change
   useEffect(() => {
     if (!searchQuery.trim() || !globalSearch) {
@@ -428,10 +421,14 @@ const Sidebar: React.FC<SidebarProps> = () => {
           <>
             {/* Backdrop click dismiss */}
             <div
-              className="fixed inset-0 z-50 bg-black/10 backdrop-blur-[1px]"
-              onClick={() => setContextMenu(null)}
+              className="fixed inset-0 z-[9998] bg-black/20 backdrop-blur-[2px]"
+              onClick={(e) => {
+                e.stopPropagation();
+                setContextMenu(null);
+              }}
               onContextMenu={(e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 setContextMenu(null);
               }}
             />
@@ -443,10 +440,10 @@ const Sidebar: React.FC<SidebarProps> = () => {
               exit={{ opacity: 0, scale: 0.92, y: 5 }}
               transition={{ duration: 0.15, ease: 'easeOut' }}
               style={{
-                top: Math.min(contextMenu.y, window.innerHeight - 240),
-                left: Math.min(contextMenu.x, window.innerWidth - 220),
+                top: Math.max(10, Math.min(contextMenu.y, window.innerHeight - 260)),
+                left: Math.max(10, Math.min(contextMenu.x, window.innerWidth - 230)),
               }}
-              className="fixed z-50 w-52 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-1.5 space-y-1 text-slate-800 dark:text-slate-100 font-sans text-xs select-none"
+              className="fixed z-[9999] w-56 bg-white dark:bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800 rounded-2xl p-1.5 space-y-1 text-slate-800 dark:text-slate-100 font-sans text-xs select-none"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Context Header */}
