@@ -88,7 +88,7 @@ const LoginCard: React.FC<LoginCardProps> = ({ onToggle }) => {
       </form>
 
       <div className="mt-8 text-center text-sm">
-        <span className="text-slate-500 dark:text-slate-400">New to Chime?</span>{' '}
+        <span className="text-slate-500 dark:text-slate-400">New to Vibe?</span>{' '}
         <button
           onClick={onToggle}
           className="font-semibold text-brand-500 hover:text-brand-400 hover:underline transition-all"

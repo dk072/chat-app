@@ -143,7 +143,7 @@ async function main() {
       data: {
         conversationId: aiConversation.id,
         senderId: antigravity.id,
-        content: 'Hello Alice! I am Antigravity, your AI pairing assistant. Welcome to Chime! You can test sending files, audio voice notes, edits, and reactions in this chat room.',
+        content: 'Hello Alice! I am Antigravity, your AI pairing assistant. Welcome to Vibe! You can test sending files, audio voice notes, edits, and reactions in this chat room.',
         isDelivered: true,
         isSeen: false
       }

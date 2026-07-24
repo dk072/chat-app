@@ -69,7 +69,7 @@ export const PremiumLoadingScreen: React.FC<PremiumLoadingScreenProps> = ({ cust
 
         {/* Brand Name */}
         <h1 className="text-3xl font-outfit font-extrabold tracking-[0.2em] bg-gradient-to-r from-violet-400 via-indigo-300 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(168,85,247,0.4)]">
-          CHIME
+          VIBE
         </h1>
 
         {/* Security Badge */}
