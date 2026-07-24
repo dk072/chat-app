@@ -36,11 +36,13 @@ export const StoriesBar: React.FC = () => {
   const musicInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   
-  // Music Search States
+  // Music Search & Preview States
   const [showMusicSearch, setShowMusicSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearchingMusic, setIsSearchingMusic] = useState(false);
+  const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const gradients = [
     'from-indigo-600 to-purple-600',
@@ -60,6 +62,19 @@ export const StoriesBar: React.FC = () => {
   useEffect(() => {
     fetchStories();
   }, []);
+
+  // Auto load trending music when opening search modal
+  useEffect(() => {
+    if (showMusicSearch && searchResults.length === 0) {
+      handleSearchMusic('trending hits');
+    }
+  }, [showMusicSearch]);
+
+  const formatTime = (sec: number) => {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
 
   const handleOpenStory = async (story: Story) => {
     setActiveStory(story);
@@ -115,8 +130,8 @@ export const StoriesBar: React.FC = () => {
   const handleMusicSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        alert("Audio file is too large. Please select a file under 5MB.");
+      if (file.size > 10 * 1024 * 1024) {
+        alert("Audio file is too large. Please select a file under 10MB.");
         return;
       }
       setMusicName(file.name);
@@ -128,24 +143,23 @@ export const StoriesBar: React.FC = () => {
         const audioSrc = event.target?.result as string;
         setBgMusic(audioSrc);
         
-        // Calculate duration
         const audio = new window.Audio();
         audio.src = audioSrc;
         audio.onloadedmetadata = () => {
-          setMusicDuration(audio.duration);
+          setMusicDuration(audio.duration || 30);
         };
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSearchMusic = async () => {
-    if (!searchQuery.trim()) return;
+  const handleSearchMusic = async (overrideTerm?: string) => {
+    const term = overrideTerm || searchQuery;
+    if (!term.trim()) return;
     setIsSearchingMusic(true);
     try {
-      const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(searchQuery)}&entity=song&limit=10`);
+      const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=song&limit=15`);
       const data = await response.json();
-      // Filter out results that don't have a previewUrl
       setSearchResults(data.results?.filter((r: any) => r.previewUrl) || []);
     } catch (e) {
       console.error(e);
@@ -159,22 +173,22 @@ export const StoriesBar: React.FC = () => {
     setBgMusic(audioSrc);
     setMusicName(`${track.trackName} - ${track.artistName}`);
     setMusicStartTime(0);
-    setMusicDuration(0);
+    setMusicDuration(30);
     
-    // Calculate duration for the online track so the trimmer appears
     const audio = new window.Audio();
     audio.src = audioSrc;
     audio.onloadedmetadata = () => {
-      setMusicDuration(audio.duration);
+      setMusicDuration(audio.duration || 30);
     };
     
     setShowMusicSearch(false);
-    setSearchQuery('');
-    setSearchResults([]);
   };
 
   const handlePostStory = async () => {
     if (!storyText.trim() && !bgImage && !bgMusic) return;
+    if (previewAudioRef.current) {
+      previewAudioRef.current.pause();
+    }
     try {
       await api.post('/nextgen/stories', {
         text: storyText.trim(),
@@ -191,6 +205,7 @@ export const StoriesBar: React.FC = () => {
       setMusicName(null);
       setMusicStartTime(0);
       setMusicDuration(0);
+      setIsPreviewPlaying(false);
       fetchStories();
     } catch (e) {
       alert('Error posting story');
@@ -247,7 +262,13 @@ export const StoriesBar: React.FC = () => {
                 <Sparkles className="w-4 h-4 text-indigo-400" />
                 <span>Create 24h Status Update</span>
               </h3>
-              <button onClick={() => setShowCreateModal(false)} className="p-1 text-slate-400 hover:text-white">
+              <button 
+                onClick={() => {
+                  setShowCreateModal(false);
+                  if (previewAudioRef.current) previewAudioRef.current.pause();
+                }} 
+                className="p-1 text-slate-400 hover:text-white"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -314,7 +335,7 @@ export const StoriesBar: React.FC = () => {
                       className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center space-x-1.5 border border-slate-700 transition-colors"
                     >
                       <Search className="w-4 h-4 text-pink-400 shrink-0" />
-                      <span className="truncate max-w-[120px]">{musicName ? musicName : 'Search Music'}</span>
+                      <span className="truncate max-w-[120px]">{musicName ? musicName : 'Search Online Music'}</span>
                     </button>
                     
                     <button
@@ -333,34 +354,85 @@ export const StoriesBar: React.FC = () => {
                     accept="audio/*"
                     className="hidden"
                   />
-
-                  {bgMusic && (
-                    <button
-                      onClick={() => { setBgMusic(null); setMusicName(null); setMusicDuration(0); setMusicStartTime(0); }}
-                      type="button"
-                      className="text-[11px] font-bold text-rose-400 hover:text-rose-300 flex items-center space-x-1"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>Remove Music</span>
-                    </button>
-                  )}
                 </div>
 
-                {/* Music Trimmer Slider */}
-                {bgMusic && musicDuration > 0 && (
-                  <div className="bg-slate-800/50 p-2 rounded-xl flex flex-col space-y-1 mt-1 border border-slate-700">
-                    <div className="flex justify-between text-[10px] text-slate-400 font-bold px-1">
-                      <span>Start Time</span>
-                      <span>{Math.floor(musicStartTime / 60)}:{(Math.floor(musicStartTime % 60)).toString().padStart(2, '0')} / {Math.floor(musicDuration / 60)}:{(Math.floor(musicDuration % 60)).toString().padStart(2, '0')}</span>
+                {/* WhatsApp / Instagram 30-Second Music Trimmer Slider */}
+                {bgMusic && (
+                  <div className="bg-slate-800/80 p-3 rounded-2xl flex flex-col space-y-2 border border-slate-700/80 text-white">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 min-w-0 pr-2">
+                        <Music className="w-4 h-4 text-pink-400 shrink-0" />
+                        <span className="text-xs font-bold text-slate-200 truncate">{musicName || 'Selected Track'}</span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setBgMusic(null);
+                          setMusicName(null);
+                          setMusicDuration(0);
+                          setMusicStartTime(0);
+                          setIsPreviewPlaying(false);
+                          if (previewAudioRef.current) {
+                            previewAudioRef.current.pause();
+                          }
+                        }}
+                        type="button"
+                        className="text-slate-400 hover:text-rose-400 transition-colors shrink-0 p-1"
+                        title="Remove Music"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-                    <input 
-                      type="range"
-                      min={0}
-                      max={Math.floor(musicDuration)}
-                      value={musicStartTime}
-                      onChange={(e) => setMusicStartTime(Number(e.target.value))}
-                      className="w-full accent-pink-500 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer"
-                    />
+
+                    <div className="space-y-1.5 pt-1">
+                      <div className="flex justify-between items-center text-[11px] text-slate-300 font-semibold px-0.5">
+                        <span className="flex items-center space-x-1">
+                          <span className="text-pink-400 font-bold">30s Clip:</span>
+                          <span>
+                            {formatTime(musicStartTime)} ➔ {formatTime(Math.min(musicStartTime + 30, musicDuration || 30))}
+                          </span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!previewAudioRef.current) {
+                              const audio = new Audio(bgMusic);
+                              previewAudioRef.current = audio;
+                            }
+                            if (isPreviewPlaying) {
+                              previewAudioRef.current.pause();
+                              setIsPreviewPlaying(false);
+                            } else {
+                              previewAudioRef.current.currentTime = musicStartTime;
+                              previewAudioRef.current.play().catch(() => {});
+                              setIsPreviewPlaying(true);
+                            }
+                          }}
+                          className="px-2.5 py-1 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/40 text-[10px] font-bold hover:bg-pink-500/30 transition-all flex items-center space-x-1"
+                        >
+                          {isPreviewPlaying ? '⏸️ Pause 30s' : '▶️ Listen 30s'}
+                        </button>
+                      </div>
+
+                      <input
+                        type="range"
+                        min={0}
+                        max={Math.max(0, musicDuration - 5)}
+                        step={0.5}
+                        value={musicStartTime}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          setMusicStartTime(val);
+                          if (previewAudioRef.current) {
+                            previewAudioRef.current.currentTime = val;
+                            if (!isPreviewPlaying) {
+                              previewAudioRef.current.play().catch(() => {});
+                              setIsPreviewPlaying(true);
+                            }
+                          }
+                        }}
+                        className="w-full accent-pink-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
                   </div>
                 )}
               </div>
@@ -394,11 +466,11 @@ export const StoriesBar: React.FC = () => {
       {/* Music Search Modal */}
       {showMusicSearch && ReactDOM.createPortal(
         <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fade-in">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm overflow-hidden text-white p-6 space-y-4 shadow-2xl flex flex-col h-[500px]">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm overflow-hidden text-white p-6 space-y-3 shadow-2xl flex flex-col h-[520px]">
             <div className="flex justify-between items-center">
               <h3 className="font-bold text-sm flex items-center space-x-1.5">
                 <Music className="w-4 h-4 text-pink-400" />
-                <span>Search Music</span>
+                <span>Search Online Music</span>
               </h3>
               <button onClick={() => setShowMusicSearch(false)} className="p-1 text-slate-400 hover:text-white">
                 <X className="w-4 h-4" />
@@ -416,7 +488,7 @@ export const StoriesBar: React.FC = () => {
                 autoFocus
               />
               <button 
-                onClick={handleSearchMusic}
+                onClick={() => handleSearchMusic()}
                 disabled={isSearchingMusic || !searchQuery.trim()}
                 className="p-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-xl transition-colors"
               >
@@ -424,21 +496,54 @@ export const StoriesBar: React.FC = () => {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto no-scrollbar space-y-2">
-              {searchResults.length === 0 && !isSearchingMusic && searchQuery.length > 0 && (
-                <p className="text-center text-slate-500 text-sm mt-8">No results found.</p>
+            {/* Genre Shortcut Pills */}
+            <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1">
+              {[
+                { label: '🔥 Trending', query: 'trending hits' },
+                { label: '💖 Romantic', query: 'romantic songs' },
+                { label: '⚡ Punjabi', query: 'punjabi hits' },
+                { label: '🎵 Bollywood', query: 'bollywood hits' },
+                { label: '🎧 Lo-Fi', query: 'lofi chill' },
+                { label: '🕺 Pop', query: 'pop hits' },
+              ].map((genre) => (
+                <button
+                  key={genre.label}
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery(genre.query);
+                    handleSearchMusic(genre.query);
+                  }}
+                  className="px-2.5 py-1 bg-slate-800 hover:bg-indigo-600/50 text-slate-300 hover:text-white rounded-full text-[10px] font-bold shrink-0 border border-slate-700 transition-colors whitespace-nowrap"
+                >
+                  {genre.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex-1 overflow-y-auto no-scrollbar space-y-2 pt-1">
+              {isSearchingMusic && (
+                <div className="flex flex-col items-center justify-center py-12 text-slate-400 space-y-2">
+                  <Loader2 className="w-5 h-5 animate-spin text-pink-400" />
+                  <span className="text-xs font-medium">Fetching online tracks...</span>
+                </div>
               )}
-              {searchResults.map((track) => (
+              {!isSearchingMusic && searchResults.length === 0 && searchQuery.length > 0 && (
+                <p className="text-center text-slate-500 text-sm mt-8">No track results found.</p>
+              )}
+              {!isSearchingMusic && searchResults.map((track) => (
                 <div 
                   key={track.trackId}
                   onClick={() => handleSelectTrack(track)}
-                  className="flex items-center space-x-3 p-2 hover:bg-slate-800 rounded-xl cursor-pointer transition-colors"
+                  className="flex items-center space-x-3 p-2.5 hover:bg-slate-800/80 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-slate-700/60 group"
                 >
-                  <img src={track.artworkUrl100} alt={track.trackName} className="w-10 h-10 rounded-md object-cover" />
+                  <img src={track.artworkUrl100} alt={track.trackName} className="w-11 h-11 rounded-lg object-cover shadow-sm group-hover:scale-105 transition-transform" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-white truncate">{track.trackName}</p>
-                    <p className="text-xs text-slate-400 truncate">{track.artistName}</p>
+                    <p className="text-xs font-bold text-white truncate">{track.trackName}</p>
+                    <p className="text-[11px] text-slate-400 truncate">{track.artistName}</p>
                   </div>
+                  <span className="text-[10px] font-bold px-2 py-1 bg-pink-500/20 text-pink-300 rounded-full border border-pink-500/30">
+                    30s Clip
+                  </span>
                 </div>
               ))}
             </div>
@@ -474,8 +579,16 @@ export const StoriesBar: React.FC = () => {
                 loop 
                 className="hidden"
                 onLoadedMetadata={(e) => {
+                  const audio = e.target as HTMLAudioElement;
                   if (activeStory.musicStartTime) {
-                    (e.target as HTMLAudioElement).currentTime = activeStory.musicStartTime;
+                    audio.currentTime = activeStory.musicStartTime;
+                  }
+                }}
+                onTimeUpdate={(e) => {
+                  const audio = e.target as HTMLAudioElement;
+                  const start = activeStory.musicStartTime || 0;
+                  if (audio.currentTime >= start + 30 || audio.currentTime < start) {
+                    audio.currentTime = start;
                   }
                 }}
               />
