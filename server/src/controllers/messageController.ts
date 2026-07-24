@@ -392,8 +392,12 @@ export const deleteMessage = async (req: Request, res: Response) => {
     }
 
     if (deleteForEveryone) {
-      if (msg.senderId !== userId) {
-        return res.status(403).json({ message: 'You can only delete your own messages for everyone.' });
+      const conversation = await prisma.conversation.findUnique({
+        where: { id: msg.conversationId },
+      });
+
+      if (!conversation || (conversation.user1Id !== userId && conversation.user2Id !== userId)) {
+        return res.status(403).json({ message: 'Unauthorized.' });
       }
 
       // Perform Cloudinary/Local asset cleanup if it had a file attachment
@@ -404,7 +408,7 @@ export const deleteMessage = async (req: Request, res: Response) => {
         await deleteMedia(msg.filePublicId, rType);
       }
 
-      // Redact message metadata in DB
+      // Permanently delete or redact message in DB for everyone
       const updatedMsg = await prisma.message.update({
         where: { id },
         data: {
@@ -437,7 +441,7 @@ export const deleteMessage = async (req: Request, res: Response) => {
         ? formattedUserId 
         : msg.deletedForUsers + `${userId},`;
 
-      const updatedMsg = await prisma.message.update({
+      await prisma.message.update({
         where: { id },
         data: {
           deletedForUsers: updatedDeletedForUsers,
@@ -459,34 +463,45 @@ export const reactToMessage = async (req: Request, res: Response) => {
   const authReq = req as AuthenticatedRequest;
   const userId = authReq.user!.id;
   const { id } = req.params;
-  const { emoji } = req.body; // Set empty to remove reaction
+  const { emoji } = req.body;
   const io = req.app.get('io');
 
   try {
     const msg = await prisma.message.findUnique({ where: { id } });
+
     if (!msg) {
       return res.status(404).json({ message: 'Message not found.' });
     }
 
-    let currentReactions: Record<string, string> = {};
-    try {
-      currentReactions = JSON.parse(msg.reactions || '{}');
-    } catch (e) {
-      currentReactions = {};
+    let reactions: Record<string, string[]> = {};
+    if (msg.reactions) {
+      try {
+        reactions = JSON.parse(msg.reactions);
+      } catch (e) {
+        reactions = {};
+      }
     }
 
-    if (!emoji) {
-      // Remove reaction
-      delete currentReactions[userId];
-    } else {
-      // Add or update reaction
-      currentReactions[userId] = emoji;
+    // Remove existing reaction of this user from any emoji key
+    Object.keys(reactions).forEach((eKey) => {
+      reactions[eKey] = reactions[eKey].filter((uId) => uId !== userId);
+      if (reactions[eKey].length === 0) {
+        delete reactions[eKey];
+      }
+    });
+
+    // Add new reaction if emoji provided
+    if (emoji) {
+      if (!reactions[emoji]) {
+        reactions[emoji] = [];
+      }
+      reactions[emoji].push(userId);
     }
 
     const updatedMsg = await prisma.message.update({
       where: { id },
       data: {
-        reactions: JSON.stringify(currentReactions),
+        reactions: JSON.stringify(reactions),
       },
       include: {
         parentMessage: {
@@ -589,12 +604,13 @@ export const togglePinConversation = async (req: Request, res: Response) => {
 };
 
 /**
- * Clears message history in a conversation for the requesting user ("Delete Chat / Clear History").
+ * Clears message history in a conversation completely for both users ("Delete Chat / Clear History").
  */
 export const deleteConversation = async (req: Request, res: Response) => {
   const authReq = req as AuthenticatedRequest;
   const userId = authReq.user!.id;
   const { conversationId } = req.params;
+  const io = req.app.get('io');
 
   try {
     const conversation = await prisma.conversation.findUnique({
@@ -609,29 +625,19 @@ export const deleteConversation = async (req: Request, res: Response) => {
       return res.status(403).json({ message: 'Unauthorized.' });
     }
 
-    const messages = await prisma.message.findMany({
+    // Delete all messages in the conversation from the database (wiping out from both sides for everyone & me)
+    await prisma.message.deleteMany({
       where: { conversationId },
     });
 
-    const formattedUserId = `,${userId},`;
+    // Notify room via socket so partner UI updates in real-time
+    if (io) {
+      io.to(conversationId).emit('chat_cleared', { conversationId });
+    }
 
-    await Promise.all(
-      messages.map((m) => {
-        if (!m.deletedForUsers.includes(formattedUserId)) {
-          const updatedDeletedForUsers = m.deletedForUsers === '' ? formattedUserId : m.deletedForUsers + `${userId},`;
-          return prisma.message.update({
-            where: { id: m.id },
-            data: { deletedForUsers: updatedDeletedForUsers },
-          });
-        }
-        return Promise.resolve();
-      })
-    );
-
-    return res.json({ message: 'Chat history cleared successfully.' });
+    return res.json({ message: 'Chat history wiped successfully from both sides.' });
   } catch (error) {
     console.error('Error clearing conversation:', error);
     return res.status(500).json({ message: 'Internal server error clearing chat history.' });
   }
 };
-

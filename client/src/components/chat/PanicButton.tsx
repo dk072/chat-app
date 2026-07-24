@@ -77,6 +77,12 @@ const PanicButton: React.FC = () => {
     };
   }, []);
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    cancelHolding();
+    handleHoldComplete();
+  };
+
   if (!enabled) return null;
 
   // Circular progress math for SVG stroke-dashoffset
@@ -88,7 +94,7 @@ const PanicButton: React.FC = () => {
     <>
       <div
         className="fixed bottom-20 right-5 sm:bottom-6 sm:right-6 z-40 flex items-center justify-center group"
-        title={`Press and hold for ${holdDurationSeconds}s to trigger Emergency Delete`}
+        title="Click to Wipe Out Everything (Delete from Everyone & Me)"
       >
         {/* Warning Pulse Aura when pressing */}
         {isPressing && (
@@ -96,6 +102,7 @@ const PanicButton: React.FC = () => {
         )}
 
         <div
+          onClick={handleClick}
           onMouseDown={startHolding}
           onMouseUp={cancelHolding}
           onMouseLeave={cancelHolding}
@@ -140,9 +147,7 @@ const PanicButton: React.FC = () => {
 
         {/* Hover / Press Tooltip */}
         <div className="absolute bottom-16 right-0 px-3 py-1.5 bg-slate-900 text-white text-[11px] font-bold rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-slate-800">
-          {isPressing
-            ? `Hold... ${Math.ceil(holdDurationSeconds - (progress / 100) * holdDurationSeconds)}s`
-            : `Emergency Delete (Hold ${holdDurationSeconds}s)`}
+          Emergency Wipeout (1-Click Delete)
         </div>
       </div>
 

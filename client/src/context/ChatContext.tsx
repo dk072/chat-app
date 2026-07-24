@@ -431,7 +431,18 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
-    // 6. Admin Banishment trigger
+    // 6. Real-time Chat Cleared (Wipeout from both sides)
+    socket.on('chat_cleared', ({ conversationId }: { conversationId: string }) => {
+      const active = activeChatRef.current;
+      if (active && active.id === conversationId) {
+        setMessages([]);
+      }
+      setConversations((prev) =>
+        prev.map((c) => (c.id === conversationId ? { ...c, lastMessage: null } : c))
+      );
+    });
+
+    // 7. Admin Banishment trigger
     socket.on('banned', ({ message }: { message: string }) => {
       alert(message);
       // Clean credentials

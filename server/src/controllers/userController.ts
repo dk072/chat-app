@@ -194,6 +194,7 @@ export const executePanicDelete = async (req: Request, res: Response) => {
   const authReq = req as AuthenticatedRequest;
   const currentUserId = authReq.user!.id;
   const { password, mode } = req.body;
+  const io = req.app.get('io');
 
   try {
     const user = await prisma.user.findUnique({ where: { id: currentUserId } });
@@ -210,9 +211,24 @@ export const executePanicDelete = async (req: Request, res: Response) => {
     }
 
     if (mode !== 'LOCAL_ONLY') {
-      // 1. Delete all messages sent by this user
+      // Find all conversations where currentUserId is a participant
+      const userConversations = await prisma.conversation.findMany({
+        where: {
+          OR: [{ user1Id: currentUserId }, { user2Id: currentUserId }],
+        },
+        select: { id: true },
+      });
+
+      const conversationIds = userConversations.map((c) => c.id);
+
+      // 1. Delete all messages (sent AND received by this user - wiping out from both sides for everyone & me)
       await prisma.message.deleteMany({
-        where: { senderId: currentUserId },
+        where: {
+          OR: [
+            { senderId: currentUserId },
+            { conversationId: { in: conversationIds } },
+          ],
+        },
       });
 
       // 2. Delete all pinned chat entries belonging to this user
@@ -232,10 +248,17 @@ export const executePanicDelete = async (req: Request, res: Response) => {
         where: { id: currentUserId },
         data: { isOnline: false, lastSeen: new Date() },
       });
+
+      // 5. Broadcast real-time chat_cleared event to all affected conversation rooms so both sides clear instantly
+      if (io) {
+        conversationIds.forEach((convId) => {
+          io.to(convId).emit('chat_cleared', { conversationId: convId });
+        });
+      }
     }
 
     return res.json({
-      message: 'Emergency Delete (Panic Mode) executed successfully.',
+      message: 'Emergency Delete (Panic Mode) executed successfully. Wiped out from both sides.',
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
